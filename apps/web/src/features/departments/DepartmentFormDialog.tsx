@@ -13,7 +13,11 @@ interface DepartmentFormDialogProps {
   department?: DepartmentDto | undefined;
 }
 
-export function DepartmentFormDialog({ open, onOpenChange, department }: DepartmentFormDialogProps) {
+export function DepartmentFormDialog({
+  open,
+  onOpenChange,
+  department,
+}: DepartmentFormDialogProps) {
   const { create, update } = useDepartments();
   const isEdit = Boolean(department);
   const mutation = isEdit ? update : create;
@@ -51,7 +55,9 @@ export function DepartmentFormDialog({ open, onOpenChange, department }: Departm
       ? update.mutateAsync({ id: department.id, payload: { name: name.trim() } })
       : create.mutateAsync({ code: code.trim(), name: name.trim() });
 
-    void promise.then(() => { onOpenChange(false); });
+    void promise.then(() => {
+      onOpenChange(false);
+    });
   };
 
   return (
@@ -67,13 +73,27 @@ export function DepartmentFormDialog({ open, onOpenChange, department }: Departm
       {!isEdit && (
         <div className="space-y-1.5">
           <Label htmlFor="department-code">Code</Label>
-          <Input id="department-code" value={code} onChange={(event) => { setCode(event.target.value); }} aria-invalid={Boolean(codeError)} />
+          <Input
+            id="department-code"
+            value={code}
+            onChange={(event) => {
+              setCode(event.target.value);
+            }}
+            aria-invalid={Boolean(codeError)}
+          />
           <FieldError message={codeError} />
         </div>
       )}
       <div className="space-y-1.5">
         <Label htmlFor="department-name">Name</Label>
-        <Input id="department-name" value={name} onChange={(event) => { setName(event.target.value); }} aria-invalid={Boolean(nameError)} />
+        <Input
+          id="department-name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          aria-invalid={Boolean(nameError)}
+        />
         <FieldError message={nameError} />
       </div>
     </FormDialog>

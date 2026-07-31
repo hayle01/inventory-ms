@@ -1,4 +1,8 @@
-import type { CreateDepartmentRequest, DepartmentDto, UpdateDepartmentRequest } from '@inventory-ms/contracts';
+import type {
+  CreateDepartmentRequest,
+  DepartmentDto,
+  UpdateDepartmentRequest,
+} from '@inventory-ms/contracts';
 import { useCrudResource } from '@/lib/useCrudResource';
 
 export function useDepartments() {

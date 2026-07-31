@@ -69,14 +69,22 @@ export function ConfirmDialog({
             <Textarea
               id="confirm-reason"
               value={reason}
-              onChange={(event) => { setReason(event.target.value); }}
+              onChange={(event) => {
+                setReason(event.target.value);
+              }}
               rows={3}
             />
           </div>
         )}
 
         <AlertDialogFooter>
-          <Button variant="outline" onClick={() => { onOpenChange(false); }} disabled={isSubmitting}>
+          <Button
+            variant="outline"
+            onClick={() => {
+              onOpenChange(false);
+            }}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
           <Button

@@ -4,7 +4,14 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -77,7 +84,9 @@ export function SuppliersPage() {
                 <TableCell className="text-muted-foreground">{supplier.phone ?? '—'}</TableCell>
                 <TableCell className="text-muted-foreground">{supplier.email ?? '—'}</TableCell>
                 <TableCell>
-                  <Badge variant={supplier.status === 'active' ? 'success' : 'muted'}>{supplier.status}</Badge>
+                  <Badge variant={supplier.status === 'active' ? 'success' : 'muted'}>
+                    {supplier.status}
+                  </Badge>
                 </TableCell>
                 {canManage && (
                   <TableCell className="text-right">
@@ -97,7 +106,12 @@ export function SuppliersPage() {
                           Edit
                         </DropdownMenuItem>
                         {supplier.status === 'active' && (
-                          <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(supplier); }}>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={() => {
+                              setArchiveTarget(supplier);
+                            }}
+                          >
                             Archive
                           </DropdownMenuItem>
                         )}
@@ -116,13 +130,15 @@ export function SuppliersPage() {
       <ConfirmDialog
         open={Boolean(archiveTarget)}
         onOpenChange={(open) => {
-            if (!open) setArchiveTarget(undefined);
-          }}
+          if (!open) setArchiveTarget(undefined);
+        }}
         title="Archive supplier"
         description={`${archiveTarget?.name ?? 'This supplier'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
+        onConfirm={() =>
+          archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve()
+        }
       />
     </main>
   );

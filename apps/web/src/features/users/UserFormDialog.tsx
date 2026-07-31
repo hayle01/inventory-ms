@@ -41,7 +41,11 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
   const [departmentId, setDepartmentId] = React.useState<string>(NO_DEPARTMENT);
   const [warehouseScopeIds, setWarehouseScopeIds] = React.useState<Set<string>>(new Set());
   const [roleIds, setRoleIds] = React.useState<Set<string>>(new Set());
-  const [errors, setErrors] = React.useState<{ fullName?: string; username?: string; email?: string }>({});
+  const [errors, setErrors] = React.useState<{
+    fullName?: string;
+    username?: string;
+    email?: string;
+  }>({});
 
   React.useEffect(() => {
     if (!open) return;
@@ -94,7 +98,9 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
           roleIds: Array.from(roleIds),
         });
 
-    void promise.then(() => { onOpenChange(false); });
+    void promise.then(() => {
+      onOpenChange(false);
+    });
   };
 
   return (
@@ -102,7 +108,9 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
       open={open}
       onOpenChange={onOpenChange}
       title={isEdit ? 'Edit user' : 'New user'}
-      description={isEdit ? 'Update profile, scope, and roles.' : 'Invite a new user to this organization.'}
+      description={
+        isEdit ? 'Update profile, scope, and roles.' : 'Invite a new user to this organization.'
+      }
       onSubmit={handleSubmit}
       submitLabel={isEdit ? 'Save changes' : 'Create user'}
       isSubmitting={mutation.isPending}
@@ -113,7 +121,9 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
         <Input
           id="user-fullName"
           value={fullName}
-          onChange={(event) => { setFullName(event.target.value); }}
+          onChange={(event) => {
+            setFullName(event.target.value);
+          }}
           aria-invalid={Boolean(errors.fullName)}
         />
         <FieldError message={errors.fullName} />
@@ -126,7 +136,9 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
             <Input
               id="user-username"
               value={username}
-              onChange={(event) => { setUsername(event.target.value); }}
+              onChange={(event) => {
+                setUsername(event.target.value);
+              }}
               aria-invalid={Boolean(errors.username)}
             />
             <FieldError message={errors.username} />
@@ -138,7 +150,9 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
               id="user-email"
               type="email"
               value={email}
-              onChange={(event) => { setEmail(event.target.value); }}
+              onChange={(event) => {
+                setEmail(event.target.value);
+              }}
               aria-invalid={Boolean(errors.email)}
             />
             <FieldError message={errors.email} />
@@ -173,7 +187,9 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
             <label key={warehouse.id} className="flex items-center gap-2 text-sm">
               <Checkbox
                 checked={warehouseScopeIds.has(warehouse.id)}
-                onCheckedChange={() => { toggleSet(warehouseScopeIds, setWarehouseScopeIds, warehouse.id); }}
+                onCheckedChange={() => {
+                  toggleSet(warehouseScopeIds, setWarehouseScopeIds, warehouse.id);
+                }}
               />
               {warehouse.name}
             </label>
@@ -191,7 +207,9 @@ export function UserFormDialog({ open, onOpenChange, user }: UserFormDialogProps
             <label key={role.id} className="flex items-center gap-2 text-sm">
               <Checkbox
                 checked={roleIds.has(role.id)}
-                onCheckedChange={() => { toggleSet(roleIds, setRoleIds, role.id); }}
+                onCheckedChange={() => {
+                  toggleSet(roleIds, setRoleIds, role.id);
+                }}
               />
               {role.name}
             </label>

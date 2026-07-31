@@ -14,7 +14,8 @@ export function usePermissions(): {
     () => ({
       permissions,
       has: (permission: Permission) => permissions.has(permission),
-      hasAny: (list: readonly Permission[]) => list.some((permission) => permissions.has(permission)),
+      hasAny: (list: readonly Permission[]) =>
+        list.some((permission) => permissions.has(permission)),
     }),
     [permissions],
   );

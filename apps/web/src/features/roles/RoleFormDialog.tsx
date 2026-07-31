@@ -72,7 +72,9 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
       ? updateRole.mutateAsync({ id: role.id, payload })
       : createRole.mutateAsync(payload);
 
-    void promise.then(() => { onOpenChange(false); });
+    void promise.then(() => {
+      onOpenChange(false);
+    });
   };
 
   const groups = React.useMemo(() => {
@@ -98,7 +100,14 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
     >
       <div className="space-y-1.5">
         <Label htmlFor="role-name">Name</Label>
-        <Input id="role-name" value={name} onChange={(event) => { setName(event.target.value); }} aria-invalid={Boolean(nameError)} />
+        <Input
+          id="role-name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          aria-invalid={Boolean(nameError)}
+        />
         <FieldError message={nameError} />
       </div>
 
@@ -107,7 +116,9 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
         <Textarea
           id="role-description"
           value={description}
-          onChange={(event) => { setDescription(event.target.value); }}
+          onChange={(event) => {
+            setDescription(event.target.value);
+          }}
           rows={2}
         />
       </div>
@@ -127,7 +138,9 @@ export function RoleFormDialog({ open, onOpenChange, role }: RoleFormDialogProps
                   <label key={permission.name} className="flex items-center gap-2 text-sm">
                     <Checkbox
                       checked={permissionNames.has(permission.name)}
-                      onCheckedChange={() => { togglePermission(permission.name); }}
+                      onCheckedChange={() => {
+                        togglePermission(permission.name);
+                      }}
                     />
                     <span className="font-mono text-xs">{permission.name}</span>
                   </label>

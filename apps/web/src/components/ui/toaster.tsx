@@ -14,9 +14,13 @@ export function Toaster() {
   return (
     <ToastProvider swipeDirection="right">
       {toasts.map(({ id, title, description, variant }) => (
-        <Toast key={id} variant={variant} onOpenChange={(open) => {
+        <Toast
+          key={id}
+          variant={variant}
+          onOpenChange={(open) => {
             if (!open) dismiss(id);
-          }}>
+          }}
+        >
           <div className="grid gap-1">
             <ToastTitle>{title}</ToastTitle>
             {description && <ToastDescription>{description}</ToastDescription>}

@@ -4,7 +4,14 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -77,7 +84,9 @@ export function UnitsPage() {
                 <TableCell className="text-muted-foreground">{unit.symbol}</TableCell>
                 <TableCell className="text-muted-foreground">{unit.decimalPlaces}</TableCell>
                 <TableCell>
-                  <Badge variant={unit.status === 'active' ? 'success' : 'muted'}>{unit.status}</Badge>
+                  <Badge variant={unit.status === 'active' ? 'success' : 'muted'}>
+                    {unit.status}
+                  </Badge>
                 </TableCell>
                 {canManage && (
                   <TableCell className="text-right">
@@ -97,7 +106,12 @@ export function UnitsPage() {
                           Edit
                         </DropdownMenuItem>
                         {unit.status === 'active' && (
-                          <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(unit); }}>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={() => {
+                              setArchiveTarget(unit);
+                            }}
+                          >
                             Archive
                           </DropdownMenuItem>
                         )}
@@ -116,13 +130,15 @@ export function UnitsPage() {
       <ConfirmDialog
         open={Boolean(archiveTarget)}
         onOpenChange={(open) => {
-            if (!open) setArchiveTarget(undefined);
-          }}
+          if (!open) setArchiveTarget(undefined);
+        }}
         title="Archive unit"
         description={`${archiveTarget?.name ?? 'This unit'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
+        onConfirm={() =>
+          archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve()
+        }
       />
     </main>
   );

@@ -4,7 +4,14 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -107,7 +114,9 @@ export function UsersPage() {
                 <TableCell>
                   <Badge variant={STATUS_VARIANT[user.status]}>{user.status}</Badge>
                 </TableCell>
-                <TableCell className="text-muted-foreground">{user.mfaEnabled ? 'Enabled' : '—'}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {user.mfaEnabled ? 'Enabled' : '—'}
+                </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -132,12 +141,21 @@ export function UsersPage() {
                         </DropdownMenuItem>
                       )}
                       {canDeactivate && user.status === 'active' && (
-                        <DropdownMenuItem onSelect={() => { setDeactivateTarget(user); }}>
+                        <DropdownMenuItem
+                          onSelect={() => {
+                            setDeactivateTarget(user);
+                          }}
+                        >
                           Deactivate
                         </DropdownMenuItem>
                       )}
                       {canDeactivate && user.status !== 'archived' && (
-                        <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(user); }}>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onSelect={() => {
+                            setArchiveTarget(user);
+                          }}
+                        >
                           Archive
                         </DropdownMenuItem>
                       )}
@@ -155,29 +173,33 @@ export function UsersPage() {
       <ConfirmDialog
         open={Boolean(deactivateTarget)}
         onOpenChange={(open) => {
-            if (!open) setDeactivateTarget(undefined);
-          }}
+          if (!open) setDeactivateTarget(undefined);
+        }}
         title="Deactivate user"
         description={`${deactivateTarget?.fullName ?? 'This user'} will no longer be able to sign in.`}
         confirmLabel="Deactivate"
         reasonLabel="Reason (optional)"
         onConfirm={(reason) =>
-          deactivateTarget ? deactivateUser.mutateAsync({ id: deactivateTarget.id, reason }) : Promise.resolve()
+          deactivateTarget
+            ? deactivateUser.mutateAsync({ id: deactivateTarget.id, reason })
+            : Promise.resolve()
         }
       />
 
       <ConfirmDialog
         open={Boolean(archiveTarget)}
         onOpenChange={(open) => {
-            if (!open) setArchiveTarget(undefined);
-          }}
+          if (!open) setArchiveTarget(undefined);
+        }}
         title="Archive user"
         description={`${archiveTarget?.fullName ?? 'This user'} will be archived and hidden from active lists. This does not delete their history.`}
         confirmLabel="Archive"
         variant="destructive"
         reasonLabel="Reason (optional)"
         onConfirm={(reason) =>
-          archiveTarget ? archiveUser.mutateAsync({ id: archiveTarget.id, reason }) : Promise.resolve()
+          archiveTarget
+            ? archiveUser.mutateAsync({ id: archiveTarget.id, reason })
+            : Promise.resolve()
         }
       />
     </main>

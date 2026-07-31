@@ -93,15 +93,18 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
     if (name.trim().length === 0) nextErrors['name'] = 'Name is required.';
     if (!categoryId) nextErrors['categoryId'] = 'Select a category.';
     if (!unitId) nextErrors['unitId'] = 'Select a unit.';
-    if (!DECIMAL_PATTERN.test(purchasePrice.trim())) nextErrors['purchasePrice'] = 'Enter a valid non-negative amount.';
+    if (!DECIMAL_PATTERN.test(purchasePrice.trim()))
+      nextErrors['purchasePrice'] = 'Enter a valid non-negative amount.';
     if (issuePrice.trim().length > 0 && !DECIMAL_PATTERN.test(issuePrice.trim())) {
       nextErrors['issuePrice'] = 'Enter a valid non-negative amount.';
     }
-    if (!DECIMAL_PATTERN.test(reorderLevel.trim())) nextErrors['reorderLevel'] = 'Enter a valid non-negative quantity.';
+    if (!DECIMAL_PATTERN.test(reorderLevel.trim()))
+      nextErrors['reorderLevel'] = 'Enter a valid non-negative quantity.';
     if (reorderQuantity.trim().length > 0 && !DECIMAL_PATTERN.test(reorderQuantity.trim())) {
       nextErrors['reorderQuantity'] = 'Enter a valid non-negative quantity.';
     }
-    if (trackExpiry && !trackLots) nextErrors['trackExpiry'] = 'Expiry tracking requires lot tracking.';
+    if (trackExpiry && !trackLots)
+      nextErrors['trackExpiry'] = 'Expiry tracking requires lot tracking.';
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
@@ -126,7 +129,9 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
       ? update.mutateAsync({ id: product.id, payload: shared })
       : create.mutateAsync({ ...shared, sku: sku.trim().toUpperCase() });
 
-    void promise.then(() => { onOpenChange(false); });
+    void promise.then(() => {
+      onOpenChange(false);
+    });
   };
 
   return (
@@ -143,20 +148,41 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
         {!isEdit && (
           <div className="space-y-1.5">
             <Label htmlFor="product-sku">SKU</Label>
-            <Input id="product-sku" value={sku} onChange={(event) => { setSku(event.target.value); }} aria-invalid={Boolean(errors['sku'])} />
+            <Input
+              id="product-sku"
+              value={sku}
+              onChange={(event) => {
+                setSku(event.target.value);
+              }}
+              aria-invalid={Boolean(errors['sku'])}
+            />
             <FieldError message={errors['sku']} />
           </div>
         )}
         <div className="space-y-1.5 col-span-2">
           <Label htmlFor="product-name">Name</Label>
-          <Input id="product-name" value={name} onChange={(event) => { setName(event.target.value); }} aria-invalid={Boolean(errors['name'])} />
+          <Input
+            id="product-name"
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+            aria-invalid={Boolean(errors['name'])}
+          />
           <FieldError message={errors['name']} />
         </div>
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="product-description">Description</Label>
-        <Textarea id="product-description" value={description} onChange={(event) => { setDescription(event.target.value); }} rows={2} />
+        <Textarea
+          id="product-description"
+          value={description}
+          onChange={(event) => {
+            setDescription(event.target.value);
+          }}
+          rows={2}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -196,7 +222,12 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
 
       <div className="space-y-1.5">
         <Label>Product type</Label>
-        <Select value={productType} onValueChange={(value) => { setProductType(value as ProductType); }}>
+        <Select
+          value={productType}
+          onValueChange={(value) => {
+            setProductType(value as ProductType);
+          }}
+        >
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -217,7 +248,9 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
             id="product-purchasePrice"
             inputMode="decimal"
             value={purchasePrice}
-            onChange={(event) => { setPurchasePrice(event.target.value); }}
+            onChange={(event) => {
+              setPurchasePrice(event.target.value);
+            }}
             aria-invalid={Boolean(errors['purchasePrice'])}
           />
           <FieldError message={errors['purchasePrice']} />
@@ -228,7 +261,9 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
             id="product-issuePrice"
             inputMode="decimal"
             value={issuePrice}
-            onChange={(event) => { setIssuePrice(event.target.value); }}
+            onChange={(event) => {
+              setIssuePrice(event.target.value);
+            }}
             aria-invalid={Boolean(errors['issuePrice'])}
           />
           <FieldError message={errors['issuePrice']} />
@@ -239,7 +274,9 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
             id="product-reorderLevel"
             inputMode="decimal"
             value={reorderLevel}
-            onChange={(event) => { setReorderLevel(event.target.value); }}
+            onChange={(event) => {
+              setReorderLevel(event.target.value);
+            }}
             aria-invalid={Boolean(errors['reorderLevel'])}
           />
           <FieldError message={errors['reorderLevel']} />
@@ -250,7 +287,9 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
             id="product-reorderQuantity"
             inputMode="decimal"
             value={reorderQuantity}
-            onChange={(event) => { setReorderQuantity(event.target.value); }}
+            onChange={(event) => {
+              setReorderQuantity(event.target.value);
+            }}
             aria-invalid={Boolean(errors['reorderQuantity'])}
           />
           <FieldError message={errors['reorderQuantity']} />
@@ -260,14 +299,23 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
       <div className="space-y-2">
         <div className="flex items-center justify-between rounded-md border border-input px-3 py-2">
           <Label htmlFor="product-trackLots">Track lots</Label>
-          <Switch id="product-trackLots" checked={trackLots} onCheckedChange={(checked) => {
-            setTrackLots(checked);
-            if (!checked) setTrackExpiry(false);
-          }} />
+          <Switch
+            id="product-trackLots"
+            checked={trackLots}
+            onCheckedChange={(checked) => {
+              setTrackLots(checked);
+              if (!checked) setTrackExpiry(false);
+            }}
+          />
         </div>
         <div className="flex items-center justify-between rounded-md border border-input px-3 py-2">
           <Label htmlFor="product-trackExpiry">Track expiry</Label>
-          <Switch id="product-trackExpiry" checked={trackExpiry} onCheckedChange={setTrackExpiry} disabled={!trackLots} />
+          <Switch
+            id="product-trackExpiry"
+            checked={trackExpiry}
+            onCheckedChange={setTrackExpiry}
+            disabled={!trackLots}
+          />
         </div>
         <FieldError message={errors['trackExpiry']} />
         {trackExpiry && (
@@ -278,13 +326,19 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
               type="number"
               min={0}
               value={expiryWarningDays}
-              onChange={(event) => { setExpiryWarningDays(event.target.value); }}
+              onChange={(event) => {
+                setExpiryWarningDays(event.target.value);
+              }}
             />
           </div>
         )}
         <div className="flex items-center justify-between rounded-md border border-input px-3 py-2">
           <Label htmlFor="product-allowNegativeStock">Allow negative stock</Label>
-          <Switch id="product-allowNegativeStock" checked={allowNegativeStock} onCheckedChange={setAllowNegativeStock} />
+          <Switch
+            id="product-allowNegativeStock"
+            checked={allowNegativeStock}
+            onCheckedChange={setAllowNegativeStock}
+          />
         </div>
       </div>
 
@@ -294,7 +348,9 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
           <Input
             id="product-barcode"
             value={barcodeInput}
-            onChange={(event) => { setBarcodeInput(event.target.value); }}
+            onChange={(event) => {
+              setBarcodeInput(event.target.value);
+            }}
             onKeyDown={(event) => {
               if (event.key === 'Enter') {
                 event.preventDefault();
@@ -309,7 +365,13 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
             {barcodes.map((barcode) => (
               <Badge key={barcode} variant="secondary">
                 {barcode}
-                <button type="button" onClick={() => { removeBarcode(barcode); }} aria-label={`Remove ${barcode}`}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    removeBarcode(barcode);
+                  }}
+                  aria-label={`Remove ${barcode}`}
+                >
                   <X className="size-3" />
                 </button>
               </Badge>

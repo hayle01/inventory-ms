@@ -58,12 +58,19 @@ export function PermissionsPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {permissions.map((permission) => (
-                  <div key={permission.name} className="flex items-center justify-between gap-3 text-sm">
+                  <div
+                    key={permission.name}
+                    className="flex items-center justify-between gap-3 text-sm"
+                  >
                     <div className="min-w-0">
                       <p className="truncate font-mono text-xs">{permission.name}</p>
-                      <p className="truncate text-xs text-muted-foreground">{permission.description}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {permission.description}
+                      </p>
                     </div>
-                    <Badge variant={RISK_VARIANT[permission.riskLevel]}>{permission.riskLevel}</Badge>
+                    <Badge variant={RISK_VARIANT[permission.riskLevel]}>
+                      {permission.riskLevel}
+                    </Badge>
                   </div>
                 ))}
               </CardContent>

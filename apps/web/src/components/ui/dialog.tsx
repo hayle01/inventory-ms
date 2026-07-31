@@ -8,7 +8,10 @@ const DialogTrigger = DialogPrimitive.Trigger;
 const DialogPortal = DialogPrimitive.Portal;
 const DialogClose = DialogPrimitive.Close;
 
-function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+function DialogOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   return (
     <DialogPrimitive.Overlay
       className={cn(
@@ -77,7 +80,10 @@ function DialogDescription({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
-    <DialogPrimitive.Description className={cn('text-sm text-muted-foreground', className)} {...props} />
+    <DialogPrimitive.Description
+      className={cn('text-sm text-muted-foreground', className)}
+      {...props}
+    />
   );
 }
 

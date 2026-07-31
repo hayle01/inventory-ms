@@ -6,7 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { ErrorState } from '@/components/data/ErrorState';
 import { ConfirmDialog } from '@/components/data/ConfirmDialog';
 import { useToast } from '@/components/ui/use-toast';
@@ -65,18 +72,31 @@ export function PurchaseOrderDetailPage() {
   }
 
   const order = po.data;
-  const supplierName = suppliers.list.data?.find((entry) => entry.id === order.supplierId)?.name ?? '—';
-  const warehouseName = warehouses.list.data?.find((entry) => entry.id === order.warehouseId)?.name ?? '—';
+  const supplierName =
+    suppliers.list.data?.find((entry) => entry.id === order.supplierId)?.name ?? '—';
+  const warehouseName =
+    warehouses.list.data?.find((entry) => entry.id === order.warehouseId)?.name ?? '—';
 
   const runTransition = (label: string, promise: Promise<unknown>) => {
     promise
-      .then(() => { toast({ variant: 'success', title: label }); })
-      .catch((error: unknown) => { toast({ variant: 'destructive', title: `${label} failed`, description: errorMessage(error) }); });
+      .then(() => {
+        toast({ variant: 'success', title: label });
+      })
+      .catch((error: unknown) => {
+        toast({
+          variant: 'destructive',
+          title: `${label} failed`,
+          description: errorMessage(error),
+        });
+      });
   };
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
-      <Link to="/apps/purchase-orders" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+      <Link
+        to="/apps/purchase-orders"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+      >
         <ArrowLeft className="size-4" />
         Back to purchase orders
       </Link>
@@ -90,7 +110,13 @@ export function PurchaseOrderDetailPage() {
               {order.status.replace(/_/g, ' ')}
             </Badge>
             {order.status === 'draft' && has('purchase_orders.update') && (
-              <Button variant="outline" size="sm" onClick={() => { setEditOpen(true); }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEditOpen(true);
+                }}
+              >
                 <Pencil />
                 Edit
               </Button>
@@ -99,7 +125,9 @@ export function PurchaseOrderDetailPage() {
               <Button
                 size="sm"
                 disabled={submitPO.isPending}
-                onClick={() => { runTransition('Submitted for approval', submitPO.mutateAsync(order.id)); }}
+                onClick={() => {
+                  runTransition('Submitted for approval', submitPO.mutateAsync(order.id));
+                }}
               >
                 {submitPO.isPending ? <Loader2 className="animate-spin" /> : <Send />}
                 Submit
@@ -109,20 +137,34 @@ export function PurchaseOrderDetailPage() {
               <Button
                 size="sm"
                 disabled={approvePO.isPending}
-                onClick={() => { runTransition('Approved', approvePO.mutateAsync(order.id)); }}
+                onClick={() => {
+                  runTransition('Approved', approvePO.mutateAsync(order.id));
+                }}
               >
                 {approvePO.isPending ? <Loader2 className="animate-spin" /> : <Check />}
                 Approve
               </Button>
             )}
             {order.status === 'submitted' && has('purchase_orders.reject') && (
-              <Button variant="destructive" size="sm" onClick={() => { setRejectOpen(true); }}>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                  setRejectOpen(true);
+                }}
+              >
                 <X />
                 Reject
               </Button>
             )}
             {OPEN_STATUSES.has(order.status) && has('purchase_orders.cancel') && (
-              <Button variant="outline" size="sm" onClick={() => { setCancelOpen(true); }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCancelOpen(true);
+                }}
+              >
                 <Ban />
                 Cancel
               </Button>

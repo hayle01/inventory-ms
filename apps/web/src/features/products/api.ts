@@ -1,4 +1,8 @@
-import type { CreateProductRequest, ProductDto, UpdateProductRequest } from '@inventory-ms/contracts';
+import type {
+  CreateProductRequest,
+  ProductDto,
+  UpdateProductRequest,
+} from '@inventory-ms/contracts';
 import { useCrudResource } from '@/lib/useCrudResource';
 
 export function useProducts() {

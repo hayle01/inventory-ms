@@ -1,4 +1,8 @@
-import type { CategoryDto, CreateCategoryRequest, UpdateCategoryRequest } from '@inventory-ms/contracts';
+import type {
+  CategoryDto,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+} from '@inventory-ms/contracts';
 import { useCrudResource } from '@/lib/useCrudResource';
 
 export function useCategories() {

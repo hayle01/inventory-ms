@@ -37,7 +37,8 @@ export function useUpdateUser() {
 export function useActivateUser() {
   const invalidate = useInvalidateUsers();
   return useMutation({
-    mutationFn: (id: string) => apiRequest<UserDto>(`${BASE_PATH}/${id}/activate`, { method: 'POST' }),
+    mutationFn: (id: string) =>
+      apiRequest<UserDto>(`${BASE_PATH}/${id}/activate`, { method: 'POST' }),
     onSuccess: invalidate,
   });
 }

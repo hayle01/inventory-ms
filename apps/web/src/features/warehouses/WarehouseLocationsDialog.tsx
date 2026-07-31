@@ -11,7 +11,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +38,11 @@ interface WarehouseLocationsDialogProps {
   warehouse: WarehouseDto | undefined;
 }
 
-export function WarehouseLocationsDialog({ open, onOpenChange, warehouse }: WarehouseLocationsDialogProps) {
+export function WarehouseLocationsDialog({
+  open,
+  onOpenChange,
+  warehouse,
+}: WarehouseLocationsDialogProps) {
   const { has } = usePermissions();
   const { list, archive } = useStorageLocations(warehouse?.id);
 
@@ -66,7 +77,9 @@ export function WarehouseLocationsDialog({ open, onOpenChange, warehouse }: Ware
         {list.isLoading && <Skeleton className="h-40" />}
         {list.isError && <ErrorState error={list.error} />}
 
-        {list.data && list.data.length === 0 && <EmptyState icon={MapPin} title="No locations yet" />}
+        {list.data && list.data.length === 0 && (
+          <EmptyState icon={MapPin} title="No locations yet" />
+        )}
 
         {list.data && list.data.length > 0 && (
           <Table>
@@ -110,7 +123,12 @@ export function WarehouseLocationsDialog({ open, onOpenChange, warehouse }: Ware
                             Edit
                           </DropdownMenuItem>
                           {location.status === 'active' && (
-                            <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(location); }}>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onSelect={() => {
+                                setArchiveTarget(location);
+                              }}
+                            >
                               Archive
                             </DropdownMenuItem>
                           )}
@@ -142,7 +160,9 @@ export function WarehouseLocationsDialog({ open, onOpenChange, warehouse }: Ware
           description={`${archiveTarget?.name ?? 'This location'} will be archived and hidden from selection lists.`}
           confirmLabel="Archive"
           variant="destructive"
-          onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
+          onConfirm={() =>
+            archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve()
+          }
         />
       </DialogContent>
     </Dialog>

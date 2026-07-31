@@ -60,7 +60,14 @@ export function FormDialog({
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => { onOpenChange(false); }} disabled={isSubmitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                onOpenChange(false);
+              }}
+              disabled={isSubmitting}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>

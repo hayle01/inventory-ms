@@ -11,7 +11,11 @@ export interface ToastItem {
 
 interface ToastContextValue {
   toasts: ToastItem[];
-  toast: (input: { title: string; description?: string | undefined; variant?: ToastVariant }) => void;
+  toast: (input: {
+    title: string;
+    description?: string | undefined;
+    variant?: ToastVariant;
+  }) => void;
   dismiss: (id: string) => void;
 }
 
@@ -24,10 +28,13 @@ export function ToastContextProvider({ children }: { children: React.ReactNode }
     setToasts((current) => current.filter((item) => item.id !== id));
   }, []);
 
-  const toast = React.useCallback<ToastContextValue['toast']>(({ title, description, variant = 'default' }) => {
-    const id = crypto.randomUUID();
-    setToasts((current) => [...current, { id, title, description, variant }]);
-  }, []);
+  const toast = React.useCallback<ToastContextValue['toast']>(
+    ({ title, description, variant = 'default' }) => {
+      const id = crypto.randomUUID();
+      setToasts((current) => [...current, { id, title, description, variant }]);
+    },
+    [],
+  );
 
   const value = React.useMemo(() => ({ toasts, toast, dismiss }), [toasts, toast, dismiss]);
 

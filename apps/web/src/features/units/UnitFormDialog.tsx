@@ -57,7 +57,9 @@ export function UnitFormDialog({ open, onOpenChange, unit }: UnitFormDialogProps
           decimalPlaces: parsedDecimalPlaces,
         });
 
-    void promise.then(() => { onOpenChange(false); });
+    void promise.then(() => {
+      onOpenChange(false);
+    });
   };
 
   return (
@@ -73,19 +75,40 @@ export function UnitFormDialog({ open, onOpenChange, unit }: UnitFormDialogProps
       {!isEdit && (
         <div className="space-y-1.5">
           <Label htmlFor="unit-code">Code</Label>
-          <Input id="unit-code" value={code} onChange={(event) => { setCode(event.target.value); }} aria-invalid={Boolean(errors.code)} />
+          <Input
+            id="unit-code"
+            value={code}
+            onChange={(event) => {
+              setCode(event.target.value);
+            }}
+            aria-invalid={Boolean(errors.code)}
+          />
           <FieldError message={errors.code} />
         </div>
       )}
       <div className="space-y-1.5">
         <Label htmlFor="unit-name">Name</Label>
-        <Input id="unit-name" value={name} onChange={(event) => { setName(event.target.value); }} aria-invalid={Boolean(errors.name)} />
+        <Input
+          id="unit-name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+          aria-invalid={Boolean(errors.name)}
+        />
         <FieldError message={errors.name} />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="unit-symbol">Symbol</Label>
-          <Input id="unit-symbol" value={symbol} onChange={(event) => { setSymbol(event.target.value); }} aria-invalid={Boolean(errors.symbol)} />
+          <Input
+            id="unit-symbol"
+            value={symbol}
+            onChange={(event) => {
+              setSymbol(event.target.value);
+            }}
+            aria-invalid={Boolean(errors.symbol)}
+          />
           <FieldError message={errors.symbol} />
         </div>
         <div className="space-y-1.5">
@@ -96,7 +119,9 @@ export function UnitFormDialog({ open, onOpenChange, unit }: UnitFormDialogProps
             min={0}
             max={6}
             value={decimalPlaces}
-            onChange={(event) => { setDecimalPlaces(event.target.value); }}
+            onChange={(event) => {
+              setDecimalPlaces(event.target.value);
+            }}
           />
         </div>
       </div>

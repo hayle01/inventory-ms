@@ -4,7 +4,14 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { ErrorState } from '@/components/data/ErrorState';
 import { EmptyState } from '@/components/data/EmptyState';
 import { ForbiddenState } from '@/components/data/ForbiddenState';
@@ -100,7 +107,9 @@ export function RolesPage() {
                       variant="ghost"
                       size="sm"
                       disabled={role.isSystem}
-                      onClick={() => { openEdit(role); }}
+                      onClick={() => {
+                        openEdit(role);
+                      }}
                     >
                       <Pencil />
                       Edit

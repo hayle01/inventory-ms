@@ -1,4 +1,8 @@
-import type { CreateSupplierRequest, SupplierDto, UpdateSupplierRequest } from '@inventory-ms/contracts';
+import type {
+  CreateSupplierRequest,
+  SupplierDto,
+  UpdateSupplierRequest,
+} from '@inventory-ms/contracts';
 import { useCrudResource } from '@/lib/useCrudResource';
 
 export function useSuppliers() {

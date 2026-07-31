@@ -36,8 +36,7 @@ async function fetchCsrfToken(): Promise<void> {
     credentials: 'include',
   });
   const payload = (await response.json().catch(() => undefined)) as
-    | { data?: { csrfToken?: string } }
-    | undefined;
+    { data?: { csrfToken?: string } } | undefined;
   csrfToken = payload?.data?.csrfToken;
 }
 

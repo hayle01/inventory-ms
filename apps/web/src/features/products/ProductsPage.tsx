@@ -5,7 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,12 +44,16 @@ export function ProductsPage() {
   const canCreate = has('products.create');
   const canUpdate = has('products.update');
   const canArchive = has('products.archive');
-  const categoryNameById = new Map((categories.list.data ?? []).map((entry) => [entry.id, entry.name]));
+  const categoryNameById = new Map(
+    (categories.list.data ?? []).map((entry) => [entry.id, entry.name]),
+  );
 
   const filtered = (list.data ?? []).filter((product) => {
     const needle = query.trim().toLowerCase();
     if (needle.length === 0) return true;
-    return product.name.toLowerCase().includes(needle) || product.sku.toLowerCase().includes(needle);
+    return (
+      product.name.toLowerCase().includes(needle) || product.sku.toLowerCase().includes(needle)
+    );
   });
 
   const openCreate = () => {
@@ -69,7 +80,9 @@ export function ProductsPage() {
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={query}
-          onChange={(event) => { setQuery(event.target.value); }}
+          onChange={(event) => {
+            setQuery(event.target.value);
+          }}
           placeholder="Search by name or SKU"
           className="pl-9"
         />
@@ -118,7 +131,9 @@ export function ProductsPage() {
                 <TableCell className="text-muted-foreground">{product.purchasePrice}</TableCell>
                 <TableCell className="text-muted-foreground">{product.reorderLevel}</TableCell>
                 <TableCell>
-                  <Badge variant={product.status === 'active' ? 'success' : 'muted'}>{product.status}</Badge>
+                  <Badge variant={product.status === 'active' ? 'success' : 'muted'}>
+                    {product.status}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
@@ -139,7 +154,12 @@ export function ProductsPage() {
                         </DropdownMenuItem>
                       )}
                       {canArchive && product.status !== 'archived' && (
-                        <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(product); }}>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onSelect={() => {
+                            setArchiveTarget(product);
+                          }}
+                        >
                           Archive
                         </DropdownMenuItem>
                       )}
@@ -157,13 +177,15 @@ export function ProductsPage() {
       <ConfirmDialog
         open={Boolean(archiveTarget)}
         onOpenChange={(open) => {
-            if (!open) setArchiveTarget(undefined);
-          }}
+          if (!open) setArchiveTarget(undefined);
+        }}
         title="Archive product"
         description={`${archiveTarget?.name ?? 'This product'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
+        onConfirm={() =>
+          archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve()
+        }
       />
     </main>
   );

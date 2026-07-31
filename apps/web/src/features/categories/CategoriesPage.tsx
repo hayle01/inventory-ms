@@ -4,7 +4,14 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -100,7 +107,12 @@ export function CategoriesPage() {
                           Edit
                         </DropdownMenuItem>
                         {category.status === 'active' && (
-                          <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(category); }}>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={() => {
+                              setArchiveTarget(category);
+                            }}
+                          >
                             Archive
                           </DropdownMenuItem>
                         )}
@@ -119,13 +131,15 @@ export function CategoriesPage() {
       <ConfirmDialog
         open={Boolean(archiveTarget)}
         onOpenChange={(open) => {
-            if (!open) setArchiveTarget(undefined);
-          }}
+          if (!open) setArchiveTarget(undefined);
+        }}
         title="Archive category"
         description={`${archiveTarget?.name ?? 'This category'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
+        onConfirm={() =>
+          archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve()
+        }
       />
     </main>
   );

@@ -14,7 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { errorMessage } from '@/lib/errorMessage';
 import { useSuppliers } from '@/features/suppliers/api';
 import { useWarehouses } from '@/features/warehouses/api';
@@ -49,7 +56,11 @@ interface PurchaseOrderFormDialogProps {
   purchaseOrder?: PurchaseOrderDto | undefined;
 }
 
-export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: PurchaseOrderFormDialogProps) {
+export function PurchaseOrderFormDialog({
+  open,
+  onOpenChange,
+  purchaseOrder,
+}: PurchaseOrderFormDialogProps) {
   const isEdit = Boolean(purchaseOrder);
   const suppliers = useSuppliers();
   const warehouses = useWarehouses();
@@ -89,7 +100,9 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
   };
 
   const removeLine = (key: string) => {
-    setLines((current) => (current.length > 1 ? current.filter((line) => line.key !== key) : current));
+    setLines((current) =>
+      current.length > 1 ? current.filter((line) => line.key !== key) : current,
+    );
   };
 
   const productById = new Map((products.list.data ?? []).map((product) => [product.id, product]));
@@ -110,7 +123,10 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
     if (!warehouseId) nextErrors['warehouseId'] = 'Select a destination warehouse.';
     lines.forEach((line, index) => {
       if (!line.productId) nextErrors[`line-${String(index)}`] = 'Select a product for every line.';
-      else if (!DECIMAL_PATTERN.test(line.orderedQuantity.trim()) || Number(line.orderedQuantity) <= 0) {
+      else if (
+        !DECIMAL_PATTERN.test(line.orderedQuantity.trim()) ||
+        Number(line.orderedQuantity) <= 0
+      ) {
         nextErrors[`line-${String(index)}`] = 'Enter a positive quantity.';
       } else if (!DECIMAL_PATTERN.test(line.unitCost.trim())) {
         nextErrors[`line-${String(index)}`] = 'Enter a valid unit cost.';
@@ -140,7 +156,9 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
           currencyCode: 'USD',
         });
 
-    void promise.then(() => { onOpenChange(false); });
+    void promise.then(() => {
+      onOpenChange(false);
+    });
   };
 
   return (
@@ -192,7 +210,14 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label>Line items</Label>
-          <Button type="button" variant="outline" size="sm" onClick={() => { setLines((current) => [...current, emptyLine()]); }}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setLines((current) => [...current, emptyLine()]);
+            }}
+          >
             <Plus />
             Add line
           </Button>
@@ -213,7 +238,12 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
             {lines.map((line, index) => (
               <TableRow key={line.key}>
                 <TableCell className="min-w-40">
-                  <Select value={line.productId} onValueChange={(value) => { updateLine(line.key, { productId: value }); }}>
+                  <Select
+                    value={line.productId}
+                    onValueChange={(value) => {
+                      updateLine(line.key, { productId: value });
+                    }}
+                  >
                     <SelectTrigger aria-invalid={Boolean(errors[`line-${String(index)}`])}>
                       <SelectValue placeholder="Product" />
                     </SelectTrigger>
@@ -231,7 +261,9 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
                     className="w-20"
                     inputMode="decimal"
                     value={line.orderedQuantity}
-                    onChange={(event) => { updateLine(line.key, { orderedQuantity: event.target.value }); }}
+                    onChange={(event) => {
+                      updateLine(line.key, { orderedQuantity: event.target.value });
+                    }}
                   />
                 </TableCell>
                 <TableCell>
@@ -239,7 +271,9 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
                     className="w-24"
                     inputMode="decimal"
                     value={line.unitCost}
-                    onChange={(event) => { updateLine(line.key, { unitCost: event.target.value }); }}
+                    onChange={(event) => {
+                      updateLine(line.key, { unitCost: event.target.value });
+                    }}
                   />
                 </TableCell>
                 <TableCell>
@@ -247,7 +281,9 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
                     className="w-20"
                     inputMode="decimal"
                     value={line.taxAmount}
-                    onChange={(event) => { updateLine(line.key, { taxAmount: event.target.value }); }}
+                    onChange={(event) => {
+                      updateLine(line.key, { taxAmount: event.target.value });
+                    }}
                   />
                 </TableCell>
                 <TableCell>
@@ -255,7 +291,9 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
                     className="w-20"
                     inputMode="decimal"
                     value={line.discountAmount}
-                    onChange={(event) => { updateLine(line.key, { discountAmount: event.target.value }); }}
+                    onChange={(event) => {
+                      updateLine(line.key, { discountAmount: event.target.value });
+                    }}
                   />
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
@@ -263,7 +301,14 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
                   {productById.get(line.productId) ? '' : ''}
                 </TableCell>
                 <TableCell>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => { removeLine(line.key); }}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      removeLine(line.key);
+                    }}
+                  >
                     <Trash2 />
                   </Button>
                 </TableCell>
@@ -281,7 +326,14 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
 
       <div className="space-y-1.5">
         <Label htmlFor="po-notes">Notes</Label>
-        <Textarea id="po-notes" value={notes} onChange={(event) => { setNotes(event.target.value); }} rows={2} />
+        <Textarea
+          id="po-notes"
+          value={notes}
+          onChange={(event) => {
+            setNotes(event.target.value);
+          }}
+          rows={2}
+        />
       </div>
     </FormDialog>
   );

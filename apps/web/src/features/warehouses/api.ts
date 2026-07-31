@@ -23,7 +23,8 @@ export function useStorageLocations(warehouseId: string | undefined) {
 
   const list = useQuery({
     queryKey,
-    queryFn: () => apiRequest<StorageLocationDto[]>(`/api/v1/warehouses/${String(warehouseId)}/locations`),
+    queryFn: () =>
+      apiRequest<StorageLocationDto[]>(`/api/v1/warehouses/${String(warehouseId)}/locations`),
     enabled: Boolean(warehouseId),
   });
 
@@ -49,9 +50,12 @@ export function useStorageLocations(warehouseId: string | undefined) {
 
   const archive = useMutation({
     mutationFn: (id: string) =>
-      apiRequest<StorageLocationDto>(`/api/v1/warehouses/${String(warehouseId)}/locations/${id}/archive`, {
-        method: 'POST',
-      }),
+      apiRequest<StorageLocationDto>(
+        `/api/v1/warehouses/${String(warehouseId)}/locations/${id}/archive`,
+        {
+          method: 'POST',
+        },
+      ),
     onSuccess: invalidate,
   });
 

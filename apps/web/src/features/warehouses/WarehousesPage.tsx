@@ -4,7 +4,14 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,7 +70,9 @@ export function WarehousesPage() {
       {list.isLoading && <Skeleton className="h-64" />}
       {list.isError && <ErrorState error={list.error} />}
 
-      {list.data && list.data.length === 0 && <EmptyState icon={WarehouseIcon} title="No warehouses yet" />}
+      {list.data && list.data.length === 0 && (
+        <EmptyState icon={WarehouseIcon} title="No warehouses yet" />
+      )}
 
       {list.data && list.data.length > 0 && (
         <Table>
@@ -95,7 +104,11 @@ export function WarehousesPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onSelect={() => { openLocations(warehouse); }}>
+                      <DropdownMenuItem
+                        onSelect={() => {
+                          openLocations(warehouse);
+                        }}
+                      >
                         <MapPin />
                         Manage locations
                       </DropdownMenuItem>
@@ -110,7 +123,12 @@ export function WarehousesPage() {
                         </DropdownMenuItem>
                       )}
                       {canManage && warehouse.status === 'active' && (
-                        <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(warehouse); }}>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onSelect={() => {
+                            setArchiveTarget(warehouse);
+                          }}
+                        >
                           Archive
                         </DropdownMenuItem>
                       )}
@@ -133,13 +151,15 @@ export function WarehousesPage() {
       <ConfirmDialog
         open={Boolean(archiveTarget)}
         onOpenChange={(open) => {
-            if (!open) setArchiveTarget(undefined);
-          }}
+          if (!open) setArchiveTarget(undefined);
+        }}
         title="Archive warehouse"
         description={`${archiveTarget?.name ?? 'This warehouse'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
+        onConfirm={() =>
+          archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve()
+        }
       />
     </main>
   );

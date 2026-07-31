@@ -54,7 +54,8 @@ function SelectContent({
         <SelectPrimitive.Viewport
           className={cn(
             'p-1',
-            position === 'popper' && 'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]',
+            position === 'popper' &&
+              'h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]',
           )}
         >
           {children}
@@ -102,7 +103,9 @@ function SelectSeparator({
   className,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Separator>) {
-  return <SelectPrimitive.Separator className={cn('-mx-1 my-1 h-px bg-border', className)} {...props} />;
+  return (
+    <SelectPrimitive.Separator className={cn('-mx-1 my-1 h-px bg-border', className)} {...props} />
+  );
 }
 
 export {

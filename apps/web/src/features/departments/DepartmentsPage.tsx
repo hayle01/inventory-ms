@@ -4,7 +4,14 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -97,7 +104,12 @@ export function DepartmentsPage() {
                           Edit
                         </DropdownMenuItem>
                         {department.status === 'active' && (
-                          <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(department); }}>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={() => {
+                              setArchiveTarget(department);
+                            }}
+                          >
                             Archive
                           </DropdownMenuItem>
                         )}
@@ -111,18 +123,24 @@ export function DepartmentsPage() {
         </Table>
       )}
 
-      <DepartmentFormDialog open={formOpen} onOpenChange={setFormOpen} department={formDepartment} />
+      <DepartmentFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        department={formDepartment}
+      />
 
       <ConfirmDialog
         open={Boolean(archiveTarget)}
         onOpenChange={(open) => {
-            if (!open) setArchiveTarget(undefined);
-          }}
+          if (!open) setArchiveTarget(undefined);
+        }}
         title="Archive department"
         description={`${archiveTarget?.name ?? 'This department'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
+        onConfirm={() =>
+          archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve()
+        }
       />
     </main>
   );

@@ -5,7 +5,14 @@ import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { ErrorState } from '@/components/data/ErrorState';
 import { EmptyState } from '@/components/data/EmptyState';
 import { ForbiddenState } from '@/components/data/ForbiddenState';
@@ -25,7 +32,9 @@ export function PurchaseOrdersPage() {
   if (!has('purchase_orders.view')) return <ForbiddenState module="purchase orders" />;
 
   const canCreate = has('purchase_orders.create');
-  const supplierNameById = new Map((suppliers.list.data ?? []).map((supplier) => [supplier.id, supplier.name]));
+  const supplierNameById = new Map(
+    (suppliers.list.data ?? []).map((supplier) => [supplier.id, supplier.name]),
+  );
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
@@ -34,7 +43,11 @@ export function PurchaseOrdersPage() {
         description="Requests to buy stock from suppliers, from draft through receipt."
         actions={
           canCreate && (
-            <Button onClick={() => { setFormOpen(true); }}>
+            <Button
+              onClick={() => {
+                setFormOpen(true);
+              }}
+            >
               <Plus />
               New purchase order
             </Button>
@@ -51,7 +64,12 @@ export function PurchaseOrdersPage() {
           title="No purchase orders yet"
           action={
             canCreate && (
-              <Button size="sm" onClick={() => { setFormOpen(true); }}>
+              <Button
+                size="sm"
+                onClick={() => {
+                  setFormOpen(true);
+                }}
+              >
                 <Plus />
                 New purchase order
               </Button>
@@ -83,7 +101,9 @@ export function PurchaseOrdersPage() {
                   {supplierNameById.get(po.supplierId) ?? '—'}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={PO_STATUS_VARIANT[po.status]}>{po.status.replace(/_/g, ' ')}</Badge>
+                  <Badge variant={PO_STATUS_VARIANT[po.status]}>
+                    {po.status.replace(/_/g, ' ')}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   {po.total} {po.currencyCode}

@@ -1,7 +1,14 @@
 import * as React from 'react';
 import { Building } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
@@ -45,7 +52,9 @@ export function OrganizationPage() {
         timezone: timezone.trim(),
         currencyCode: currencyCode.trim().toUpperCase(),
       })
-      .then(() => { setSaved(true); })
+      .then(() => {
+        setSaved(true);
+      })
       .catch(() => undefined);
   };
 
@@ -77,7 +86,9 @@ export function OrganizationPage() {
                 <Input
                   id="org-name"
                   value={name}
-                  onChange={(event) => { setName(event.target.value); }}
+                  onChange={(event) => {
+                    setName(event.target.value);
+                  }}
                   disabled={!canManage}
                 />
               </div>
@@ -87,7 +98,9 @@ export function OrganizationPage() {
                   <Input
                     id="org-timezone"
                     value={timezone}
-                    onChange={(event) => { setTimezone(event.target.value); }}
+                    onChange={(event) => {
+                      setTimezone(event.target.value);
+                    }}
                     disabled={!canManage}
                     placeholder="e.g. Africa/Mogadishu"
                   />
@@ -97,7 +110,9 @@ export function OrganizationPage() {
                   <Input
                     id="org-currency"
                     value={currencyCode}
-                    onChange={(event) => { setCurrencyCode(event.target.value); }}
+                    onChange={(event) => {
+                      setCurrencyCode(event.target.value);
+                    }}
                     disabled={!canManage}
                     maxLength={3}
                     placeholder="e.g. USD"

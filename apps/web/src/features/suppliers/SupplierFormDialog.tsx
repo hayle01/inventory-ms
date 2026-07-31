@@ -65,7 +65,9 @@ export function SupplierFormDialog({ open, onOpenChange, supplier }: SupplierFor
       ? update.mutateAsync({ id: supplier.id, payload: shared })
       : create.mutateAsync({ ...shared, code: code.trim() });
 
-    void promise.then(() => { onOpenChange(false); });
+    void promise.then(() => {
+      onOpenChange(false);
+    });
   };
 
   return (
@@ -82,42 +84,90 @@ export function SupplierFormDialog({ open, onOpenChange, supplier }: SupplierFor
         {!isEdit && (
           <div className="space-y-1.5">
             <Label htmlFor="supplier-code">Code</Label>
-            <Input id="supplier-code" value={code} onChange={(event) => { setCode(event.target.value); }} aria-invalid={Boolean(errors.code)} />
+            <Input
+              id="supplier-code"
+              value={code}
+              onChange={(event) => {
+                setCode(event.target.value);
+              }}
+              aria-invalid={Boolean(errors.code)}
+            />
             <FieldError message={errors.code} />
           </div>
         )}
         <div className={isEdit ? 'col-span-2 space-y-1.5' : 'space-y-1.5'}>
           <Label htmlFor="supplier-name">Name</Label>
-          <Input id="supplier-name" value={name} onChange={(event) => { setName(event.target.value); }} aria-invalid={Boolean(errors.name)} />
+          <Input
+            id="supplier-name"
+            value={name}
+            onChange={(event) => {
+              setName(event.target.value);
+            }}
+            aria-invalid={Boolean(errors.name)}
+          />
           <FieldError message={errors.name} />
         </div>
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="supplier-address">Address</Label>
-        <Textarea id="supplier-address" value={addressLine} onChange={(event) => { setAddressLine(event.target.value); }} rows={2} />
+        <Textarea
+          id="supplier-address"
+          value={addressLine}
+          onChange={(event) => {
+            setAddressLine(event.target.value);
+          }}
+          rows={2}
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="supplier-phone">Phone</Label>
-          <Input id="supplier-phone" value={phone} onChange={(event) => { setPhone(event.target.value); }} />
+          <Input
+            id="supplier-phone"
+            value={phone}
+            onChange={(event) => {
+              setPhone(event.target.value);
+            }}
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="supplier-email">Email</Label>
-          <Input id="supplier-email" type="email" value={email} onChange={(event) => { setEmail(event.target.value); }} aria-invalid={Boolean(errors.email)} />
+          <Input
+            id="supplier-email"
+            type="email"
+            value={email}
+            onChange={(event) => {
+              setEmail(event.target.value);
+            }}
+            aria-invalid={Boolean(errors.email)}
+          />
           <FieldError message={errors.email} />
         </div>
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="supplier-tax">Tax identifier</Label>
-        <Input id="supplier-tax" value={taxIdentifier} onChange={(event) => { setTaxIdentifier(event.target.value); }} />
+        <Input
+          id="supplier-tax"
+          value={taxIdentifier}
+          onChange={(event) => {
+            setTaxIdentifier(event.target.value);
+          }}
+        />
       </div>
 
       <div className="space-y-1.5">
         <Label htmlFor="supplier-notes">Notes</Label>
-        <Textarea id="supplier-notes" value={notes} onChange={(event) => { setNotes(event.target.value); }} rows={2} />
+        <Textarea
+          id="supplier-notes"
+          value={notes}
+          onChange={(event) => {
+            setNotes(event.target.value);
+          }}
+          rows={2}
+        />
       </div>
     </FormDialog>
   );
