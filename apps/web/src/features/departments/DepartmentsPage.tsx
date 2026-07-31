@@ -97,7 +97,7 @@ export function DepartmentsPage() {
                           Edit
                         </DropdownMenuItem>
                         {department.status === 'active' && (
-                          <DropdownMenuItem variant="destructive" onSelect={() => setArchiveTarget(department)}>
+                          <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(department); }}>
                             Archive
                           </DropdownMenuItem>
                         )}
@@ -115,12 +115,14 @@ export function DepartmentsPage() {
 
       <ConfirmDialog
         open={Boolean(archiveTarget)}
-        onOpenChange={(open) => !open && setArchiveTarget(undefined)}
+        onOpenChange={(open) => {
+            if (!open) setArchiveTarget(undefined);
+          }}
         title="Archive department"
         description={`${archiveTarget?.name ?? 'This department'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => archive.mutateAsync(archiveTarget!.id)}
+        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
       />
     </main>
   );

@@ -70,8 +70,8 @@ export function PurchaseOrderDetailPage() {
 
   const runTransition = (label: string, promise: Promise<unknown>) => {
     promise
-      .then(() => toast({ variant: 'success', title: label }))
-      .catch((error: unknown) => toast({ variant: 'destructive', title: `${label} failed`, description: errorMessage(error) }));
+      .then(() => { toast({ variant: 'success', title: label }); })
+      .catch((error: unknown) => { toast({ variant: 'destructive', title: `${label} failed`, description: errorMessage(error) }); });
   };
 
   return (
@@ -90,7 +90,7 @@ export function PurchaseOrderDetailPage() {
               {order.status.replace(/_/g, ' ')}
             </Badge>
             {order.status === 'draft' && has('purchase_orders.update') && (
-              <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => { setEditOpen(true); }}>
                 <Pencil />
                 Edit
               </Button>
@@ -99,7 +99,7 @@ export function PurchaseOrderDetailPage() {
               <Button
                 size="sm"
                 disabled={submitPO.isPending}
-                onClick={() => runTransition('Submitted for approval', submitPO.mutateAsync(order.id))}
+                onClick={() => { runTransition('Submitted for approval', submitPO.mutateAsync(order.id)); }}
               >
                 {submitPO.isPending ? <Loader2 className="animate-spin" /> : <Send />}
                 Submit
@@ -109,20 +109,20 @@ export function PurchaseOrderDetailPage() {
               <Button
                 size="sm"
                 disabled={approvePO.isPending}
-                onClick={() => runTransition('Approved', approvePO.mutateAsync(order.id))}
+                onClick={() => { runTransition('Approved', approvePO.mutateAsync(order.id)); }}
               >
                 {approvePO.isPending ? <Loader2 className="animate-spin" /> : <Check />}
                 Approve
               </Button>
             )}
             {order.status === 'submitted' && has('purchase_orders.reject') && (
-              <Button variant="destructive" size="sm" onClick={() => setRejectOpen(true)}>
+              <Button variant="destructive" size="sm" onClick={() => { setRejectOpen(true); }}>
                 <X />
                 Reject
               </Button>
             )}
             {OPEN_STATUSES.has(order.status) && has('purchase_orders.cancel') && (
-              <Button variant="outline" size="sm" onClick={() => setCancelOpen(true)}>
+              <Button variant="outline" size="sm" onClick={() => { setCancelOpen(true); }}>
                 <Ban />
                 Cancel
               </Button>
@@ -202,7 +202,7 @@ export function PurchaseOrderDetailPage() {
         </Card>
       )}
 
-      {(order.rejectionReason || order.cancellationReason) && (
+      {(order.rejectionReason ?? order.cancellationReason) && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">

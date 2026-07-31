@@ -18,7 +18,7 @@ interface StorageLocationFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   warehouseId: string;
-  location?: StorageLocationDto;
+  location?: StorageLocationDto | undefined;
 }
 
 export function StorageLocationFormDialog({
@@ -53,11 +53,11 @@ export function StorageLocationFormDialog({
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
-    const promise = isEdit
-      ? update.mutateAsync({ id: location!.id, payload: { name: name.trim(), locationType } })
+    const promise = location
+      ? update.mutateAsync({ id: location.id, payload: { name: name.trim(), locationType } })
       : create.mutateAsync({ code: code.trim(), name: name.trim(), locationType });
 
-    void promise.then(() => onOpenChange(false));
+    void promise.then(() => { onOpenChange(false); });
   };
 
   return (
@@ -73,18 +73,18 @@ export function StorageLocationFormDialog({
       {!isEdit && (
         <div className="space-y-1.5">
           <Label htmlFor="location-code">Code</Label>
-          <Input id="location-code" value={code} onChange={(event) => setCode(event.target.value)} aria-invalid={Boolean(errors.code)} />
+          <Input id="location-code" value={code} onChange={(event) => { setCode(event.target.value); }} aria-invalid={Boolean(errors.code)} />
           <FieldError message={errors.code} />
         </div>
       )}
       <div className="space-y-1.5">
         <Label htmlFor="location-name">Name</Label>
-        <Input id="location-name" value={name} onChange={(event) => setName(event.target.value)} aria-invalid={Boolean(errors.name)} />
+        <Input id="location-name" value={name} onChange={(event) => { setName(event.target.value); }} aria-invalid={Boolean(errors.name)} />
         <FieldError message={errors.name} />
       </div>
       <div className="space-y-1.5">
         <Label>Type</Label>
-        <Select value={locationType} onValueChange={(value) => setLocationType(value as LocationType)}>
+        <Select value={locationType} onValueChange={(value) => { setLocationType(value as LocationType); }}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>

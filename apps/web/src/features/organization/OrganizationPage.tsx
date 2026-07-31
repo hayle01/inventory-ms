@@ -36,7 +36,7 @@ export function OrganizationPage() {
 
   const canManage = has('organizations.manage');
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = (event: React.SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSaved(false);
     updateOrganization
@@ -45,7 +45,7 @@ export function OrganizationPage() {
         timezone: timezone.trim(),
         currencyCode: currencyCode.trim().toUpperCase(),
       })
-      .then(() => setSaved(true))
+      .then(() => { setSaved(true); })
       .catch(() => undefined);
   };
 
@@ -77,7 +77,7 @@ export function OrganizationPage() {
                 <Input
                   id="org-name"
                   value={name}
-                  onChange={(event) => setName(event.target.value)}
+                  onChange={(event) => { setName(event.target.value); }}
                   disabled={!canManage}
                 />
               </div>
@@ -87,7 +87,7 @@ export function OrganizationPage() {
                   <Input
                     id="org-timezone"
                     value={timezone}
-                    onChange={(event) => setTimezone(event.target.value)}
+                    onChange={(event) => { setTimezone(event.target.value); }}
                     disabled={!canManage}
                     placeholder="e.g. Africa/Mogadishu"
                   />
@@ -97,7 +97,7 @@ export function OrganizationPage() {
                   <Input
                     id="org-currency"
                     value={currencyCode}
-                    onChange={(event) => setCurrencyCode(event.target.value)}
+                    onChange={(event) => { setCurrencyCode(event.target.value); }}
                     disabled={!canManage}
                     maxLength={3}
                     placeholder="e.g. USD"

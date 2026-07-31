@@ -97,7 +97,7 @@ export function SuppliersPage() {
                           Edit
                         </DropdownMenuItem>
                         {supplier.status === 'active' && (
-                          <DropdownMenuItem variant="destructive" onSelect={() => setArchiveTarget(supplier)}>
+                          <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(supplier); }}>
                             Archive
                           </DropdownMenuItem>
                         )}
@@ -115,12 +115,14 @@ export function SuppliersPage() {
 
       <ConfirmDialog
         open={Boolean(archiveTarget)}
-        onOpenChange={(open) => !open && setArchiveTarget(undefined)}
+        onOpenChange={(open) => {
+            if (!open) setArchiveTarget(undefined);
+          }}
         title="Archive supplier"
         description={`${archiveTarget?.name ?? 'This supplier'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => archive.mutateAsync(archiveTarget!.id)}
+        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
       />
     </main>
   );

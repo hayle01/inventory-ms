@@ -69,7 +69,7 @@ export function ProductsPage() {
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           value={query}
-          onChange={(event) => setQuery(event.target.value)}
+          onChange={(event) => { setQuery(event.target.value); }}
           placeholder="Search by name or SKU"
           className="pl-9"
         />
@@ -139,7 +139,7 @@ export function ProductsPage() {
                         </DropdownMenuItem>
                       )}
                       {canArchive && product.status !== 'archived' && (
-                        <DropdownMenuItem variant="destructive" onSelect={() => setArchiveTarget(product)}>
+                        <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(product); }}>
                           Archive
                         </DropdownMenuItem>
                       )}
@@ -156,12 +156,14 @@ export function ProductsPage() {
 
       <ConfirmDialog
         open={Boolean(archiveTarget)}
-        onOpenChange={(open) => !open && setArchiveTarget(undefined)}
+        onOpenChange={(open) => {
+            if (!open) setArchiveTarget(undefined);
+          }}
         title="Archive product"
         description={`${archiveTarget?.name ?? 'This product'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => archive.mutateAsync(archiveTarget!.id)}
+        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
       />
     </main>
   );

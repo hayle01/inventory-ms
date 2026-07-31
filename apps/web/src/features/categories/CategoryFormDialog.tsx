@@ -20,7 +20,7 @@ const NO_PARENT = '__none__';
 interface CategoryFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  category?: CategoryDto;
+  category?: CategoryDto | undefined;
 }
 
 export function CategoryFormDialog({ open, onOpenChange, category }: CategoryFormDialogProps) {
@@ -63,9 +63,9 @@ export function CategoryFormDialog({ open, onOpenChange, category }: CategoryFor
 
     const parentValue = parentId === NO_PARENT ? null : parentId;
 
-    const promise = isEdit
+    const promise = category
       ? update.mutateAsync({
-          id: category!.id,
+          id: category.id,
           payload: { name: name.trim(), description: description.trim() || null, parentId: parentValue },
         })
       : create.mutateAsync({
@@ -75,7 +75,7 @@ export function CategoryFormDialog({ open, onOpenChange, category }: CategoryFor
           parentId: parentValue,
         });
 
-    void promise.then(() => onOpenChange(false));
+    void promise.then(() => { onOpenChange(false); });
   };
 
   return (
@@ -91,13 +91,13 @@ export function CategoryFormDialog({ open, onOpenChange, category }: CategoryFor
       {!isEdit && (
         <div className="space-y-1.5">
           <Label htmlFor="category-code">Code</Label>
-          <Input id="category-code" value={code} onChange={(event) => setCode(event.target.value)} aria-invalid={Boolean(codeError)} />
+          <Input id="category-code" value={code} onChange={(event) => { setCode(event.target.value); }} aria-invalid={Boolean(codeError)} />
           <FieldError message={codeError} />
         </div>
       )}
       <div className="space-y-1.5">
         <Label htmlFor="category-name">Name</Label>
-        <Input id="category-name" value={name} onChange={(event) => setName(event.target.value)} aria-invalid={Boolean(nameError)} />
+        <Input id="category-name" value={name} onChange={(event) => { setName(event.target.value); }} aria-invalid={Boolean(nameError)} />
         <FieldError message={nameError} />
       </div>
       <div className="space-y-1.5">
@@ -123,7 +123,7 @@ export function CategoryFormDialog({ open, onOpenChange, category }: CategoryFor
         <Textarea
           id="category-description"
           value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          onChange={(event) => { setDescription(event.target.value); }}
           rows={2}
         />
       </div>

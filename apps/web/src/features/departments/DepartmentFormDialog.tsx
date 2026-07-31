@@ -10,7 +10,7 @@ import { useDepartments } from './api';
 interface DepartmentFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  department?: DepartmentDto;
+  department?: DepartmentDto | undefined;
 }
 
 export function DepartmentFormDialog({ open, onOpenChange, department }: DepartmentFormDialogProps) {
@@ -47,11 +47,11 @@ export function DepartmentFormDialog({ open, onOpenChange, department }: Departm
     }
     if (hasError) return;
 
-    const promise = isEdit
-      ? update.mutateAsync({ id: department!.id, payload: { name: name.trim() } })
+    const promise = department
+      ? update.mutateAsync({ id: department.id, payload: { name: name.trim() } })
       : create.mutateAsync({ code: code.trim(), name: name.trim() });
 
-    void promise.then(() => onOpenChange(false));
+    void promise.then(() => { onOpenChange(false); });
   };
 
   return (
@@ -67,13 +67,13 @@ export function DepartmentFormDialog({ open, onOpenChange, department }: Departm
       {!isEdit && (
         <div className="space-y-1.5">
           <Label htmlFor="department-code">Code</Label>
-          <Input id="department-code" value={code} onChange={(event) => setCode(event.target.value)} aria-invalid={Boolean(codeError)} />
+          <Input id="department-code" value={code} onChange={(event) => { setCode(event.target.value); }} aria-invalid={Boolean(codeError)} />
           <FieldError message={codeError} />
         </div>
       )}
       <div className="space-y-1.5">
         <Label htmlFor="department-name">Name</Label>
-        <Input id="department-name" value={name} onChange={(event) => setName(event.target.value)} aria-invalid={Boolean(nameError)} />
+        <Input id="department-name" value={name} onChange={(event) => { setName(event.target.value); }} aria-invalid={Boolean(nameError)} />
         <FieldError message={nameError} />
       </div>
     </FormDialog>

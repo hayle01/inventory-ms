@@ -95,7 +95,7 @@ export function WarehousesPage() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onSelect={() => openLocations(warehouse)}>
+                      <DropdownMenuItem onSelect={() => { openLocations(warehouse); }}>
                         <MapPin />
                         Manage locations
                       </DropdownMenuItem>
@@ -110,7 +110,7 @@ export function WarehousesPage() {
                         </DropdownMenuItem>
                       )}
                       {canManage && warehouse.status === 'active' && (
-                        <DropdownMenuItem variant="destructive" onSelect={() => setArchiveTarget(warehouse)}>
+                        <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(warehouse); }}>
                           Archive
                         </DropdownMenuItem>
                       )}
@@ -132,12 +132,14 @@ export function WarehousesPage() {
 
       <ConfirmDialog
         open={Boolean(archiveTarget)}
-        onOpenChange={(open) => !open && setArchiveTarget(undefined)}
+        onOpenChange={(open) => {
+            if (!open) setArchiveTarget(undefined);
+          }}
         title="Archive warehouse"
         description={`${archiveTarget?.name ?? 'This warehouse'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => archive.mutateAsync(archiveTarget!.id)}
+        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
       />
     </main>
   );

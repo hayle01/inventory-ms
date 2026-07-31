@@ -20,7 +20,7 @@ export function usePurchaseOrders() {
 export function usePurchaseOrder(id: string | undefined) {
   return useQuery({
     queryKey: ['purchase-orders', id],
-    queryFn: () => apiRequest<PurchaseOrderDto>(`${BASE_PATH}/${id}`),
+    queryFn: () => apiRequest<PurchaseOrderDto>(`${BASE_PATH}/${String(id)}`),
     enabled: Boolean(id),
   });
 }
@@ -38,7 +38,7 @@ export function useCreatePurchaseOrder() {
   return useMutation({
     mutationFn: (payload: CreatePurchaseOrderRequest) =>
       apiRequest<PurchaseOrderDto>(BASE_PATH, { method: 'POST', body: payload }),
-    onSuccess: () => invalidate(),
+    onSuccess: () => { invalidate(); },
   });
 }
 
@@ -47,7 +47,7 @@ export function useUpdatePurchaseOrder() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: UpdatePurchaseOrderRequest }) =>
       apiRequest<PurchaseOrderDto>(`${BASE_PATH}/${id}`, { method: 'PATCH', body: payload }),
-    onSuccess: (_data, variables) => invalidate(variables.id),
+    onSuccess: (_data, variables) => { invalidate(variables.id); },
   });
 }
 
@@ -56,7 +56,7 @@ function useTransition(action: 'submit' | 'approve') {
   return useMutation({
     mutationFn: (id: string) =>
       apiRequest<PurchaseOrderDto>(`${BASE_PATH}/${id}/${action}`, { method: 'POST' }),
-    onSuccess: (_data, id) => invalidate(id),
+    onSuccess: (_data, id) => { invalidate(id); },
   });
 }
 
@@ -76,7 +76,7 @@ export function useRejectPurchaseOrder() {
         method: 'POST',
         body: { reason } satisfies RejectPurchaseOrderRequest,
       }),
-    onSuccess: (_data, variables) => invalidate(variables.id),
+    onSuccess: (_data, variables) => { invalidate(variables.id); },
   });
 }
 
@@ -88,6 +88,6 @@ export function useCancelPurchaseOrder() {
         method: 'POST',
         body: { reason } satisfies CancelPurchaseOrderRequest,
       }),
-    onSuccess: (_data, variables) => invalidate(variables.id),
+    onSuccess: (_data, variables) => { invalidate(variables.id); },
   });
 }

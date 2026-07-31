@@ -46,7 +46,7 @@ function emptyLine(): LineItemDraft {
 interface PurchaseOrderFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  purchaseOrder?: PurchaseOrderDto;
+  purchaseOrder?: PurchaseOrderDto | undefined;
 }
 
 export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: PurchaseOrderFormDialogProps) {
@@ -106,14 +106,14 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
 
   const handleSubmit = () => {
     const nextErrors: Record<string, string> = {};
-    if (!supplierId) nextErrors.supplierId = 'Select a supplier.';
-    if (!warehouseId) nextErrors.warehouseId = 'Select a destination warehouse.';
+    if (!supplierId) nextErrors['supplierId'] = 'Select a supplier.';
+    if (!warehouseId) nextErrors['warehouseId'] = 'Select a destination warehouse.';
     lines.forEach((line, index) => {
-      if (!line.productId) nextErrors[`line-${index}`] = 'Select a product for every line.';
+      if (!line.productId) nextErrors[`line-${String(index)}`] = 'Select a product for every line.';
       else if (!DECIMAL_PATTERN.test(line.orderedQuantity.trim()) || Number(line.orderedQuantity) <= 0) {
-        nextErrors[`line-${index}`] = 'Enter a positive quantity.';
+        nextErrors[`line-${String(index)}`] = 'Enter a positive quantity.';
       } else if (!DECIMAL_PATTERN.test(line.unitCost.trim())) {
-        nextErrors[`line-${index}`] = 'Enter a valid unit cost.';
+        nextErrors[`line-${String(index)}`] = 'Enter a valid unit cost.';
       }
     });
     setErrors(nextErrors);
@@ -127,14 +127,20 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
       discountAmount: line.discountAmount.trim() || '0',
     }));
 
-    const promise = isEdit
+    const promise = purchaseOrder
       ? updatePO.mutateAsync({
-          id: purchaseOrder!.id,
+          id: purchaseOrder.id,
           payload: { supplierId, warehouseId, items, notes: notes.trim() || null },
         })
-      : createPO.mutateAsync({ supplierId, warehouseId, items, notes: notes.trim() || null });
+      : createPO.mutateAsync({
+          supplierId,
+          warehouseId,
+          items,
+          notes: notes.trim() || null,
+          currencyCode: 'USD',
+        });
 
-    void promise.then(() => onOpenChange(false));
+    void promise.then(() => { onOpenChange(false); });
   };
 
   return (
@@ -152,7 +158,7 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
         <div className="space-y-1.5">
           <Label>Supplier</Label>
           <Select value={supplierId} onValueChange={setSupplierId}>
-            <SelectTrigger aria-invalid={Boolean(errors.supplierId)}>
+            <SelectTrigger aria-invalid={Boolean(errors['supplierId'])}>
               <SelectValue placeholder="Select a supplier" />
             </SelectTrigger>
             <SelectContent>
@@ -163,12 +169,12 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
               ))}
             </SelectContent>
           </Select>
-          <FieldError message={errors.supplierId} />
+          <FieldError message={errors['supplierId']} />
         </div>
         <div className="space-y-1.5">
           <Label>Destination warehouse</Label>
           <Select value={warehouseId} onValueChange={setWarehouseId}>
-            <SelectTrigger aria-invalid={Boolean(errors.warehouseId)}>
+            <SelectTrigger aria-invalid={Boolean(errors['warehouseId'])}>
               <SelectValue placeholder="Select a warehouse" />
             </SelectTrigger>
             <SelectContent>
@@ -179,14 +185,14 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
               ))}
             </SelectContent>
           </Select>
-          <FieldError message={errors.warehouseId} />
+          <FieldError message={errors['warehouseId']} />
         </div>
       </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label>Line items</Label>
-          <Button type="button" variant="outline" size="sm" onClick={() => setLines((current) => [...current, emptyLine()])}>
+          <Button type="button" variant="outline" size="sm" onClick={() => { setLines((current) => [...current, emptyLine()]); }}>
             <Plus />
             Add line
           </Button>
@@ -207,8 +213,8 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
             {lines.map((line, index) => (
               <TableRow key={line.key}>
                 <TableCell className="min-w-40">
-                  <Select value={line.productId} onValueChange={(value) => updateLine(line.key, { productId: value })}>
-                    <SelectTrigger aria-invalid={Boolean(errors[`line-${index}`])}>
+                  <Select value={line.productId} onValueChange={(value) => { updateLine(line.key, { productId: value }); }}>
+                    <SelectTrigger aria-invalid={Boolean(errors[`line-${String(index)}`])}>
                       <SelectValue placeholder="Product" />
                     </SelectTrigger>
                     <SelectContent>
@@ -225,7 +231,7 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
                     className="w-20"
                     inputMode="decimal"
                     value={line.orderedQuantity}
-                    onChange={(event) => updateLine(line.key, { orderedQuantity: event.target.value })}
+                    onChange={(event) => { updateLine(line.key, { orderedQuantity: event.target.value }); }}
                   />
                 </TableCell>
                 <TableCell>
@@ -233,7 +239,7 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
                     className="w-24"
                     inputMode="decimal"
                     value={line.unitCost}
-                    onChange={(event) => updateLine(line.key, { unitCost: event.target.value })}
+                    onChange={(event) => { updateLine(line.key, { unitCost: event.target.value }); }}
                   />
                 </TableCell>
                 <TableCell>
@@ -241,7 +247,7 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
                     className="w-20"
                     inputMode="decimal"
                     value={line.taxAmount}
-                    onChange={(event) => updateLine(line.key, { taxAmount: event.target.value })}
+                    onChange={(event) => { updateLine(line.key, { taxAmount: event.target.value }); }}
                   />
                 </TableCell>
                 <TableCell>
@@ -249,7 +255,7 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
                     className="w-20"
                     inputMode="decimal"
                     value={line.discountAmount}
-                    onChange={(event) => updateLine(line.key, { discountAmount: event.target.value })}
+                    onChange={(event) => { updateLine(line.key, { discountAmount: event.target.value }); }}
                   />
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
@@ -257,7 +263,7 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
                   {productById.get(line.productId) ? '' : ''}
                 </TableCell>
                 <TableCell>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => removeLine(line.key)}>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => { removeLine(line.key); }}>
                     <Trash2 />
                   </Button>
                 </TableCell>
@@ -275,7 +281,7 @@ export function PurchaseOrderFormDialog({ open, onOpenChange, purchaseOrder }: P
 
       <div className="space-y-1.5">
         <Label htmlFor="po-notes">Notes</Label>
-        <Textarea id="po-notes" value={notes} onChange={(event) => setNotes(event.target.value)} rows={2} />
+        <Textarea id="po-notes" value={notes} onChange={(event) => { setNotes(event.target.value); }} rows={2} />
       </div>
     </FormDialog>
   );

@@ -22,7 +22,7 @@ interface ConfirmDialogProps {
   /** When set, captures a free-text reason before confirming. */
   reasonLabel?: string;
   reasonRequired?: boolean;
-  onConfirm: (reason?: string) => Promise<void> | void;
+  onConfirm: (reason?: string) => Promise<unknown>;
 }
 
 export function ConfirmDialog({
@@ -69,14 +69,14 @@ export function ConfirmDialog({
             <Textarea
               id="confirm-reason"
               value={reason}
-              onChange={(event) => setReason(event.target.value)}
+              onChange={(event) => { setReason(event.target.value); }}
               rows={3}
             />
           </div>
         )}
 
         <AlertDialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+          <Button variant="outline" onClick={() => { onOpenChange(false); }} disabled={isSubmitting}>
             Cancel
           </Button>
           <Button

@@ -100,7 +100,7 @@ export function RolesPage() {
                       variant="ghost"
                       size="sm"
                       disabled={role.isSystem}
-                      onClick={() => openEdit(role)}
+                      onClick={() => { openEdit(role); }}
                     >
                       <Pencil />
                       Edit

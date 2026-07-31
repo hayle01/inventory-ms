@@ -110,7 +110,7 @@ export function WarehouseLocationsDialog({ open, onOpenChange, warehouse }: Ware
                             Edit
                           </DropdownMenuItem>
                           {location.status === 'active' && (
-                            <DropdownMenuItem variant="destructive" onSelect={() => setArchiveTarget(location)}>
+                            <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(location); }}>
                               Archive
                             </DropdownMenuItem>
                           )}
@@ -135,12 +135,14 @@ export function WarehouseLocationsDialog({ open, onOpenChange, warehouse }: Ware
 
         <ConfirmDialog
           open={Boolean(archiveTarget)}
-          onOpenChange={(nextOpen) => !nextOpen && setArchiveTarget(undefined)}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen) setArchiveTarget(undefined);
+          }}
           title="Archive location"
           description={`${archiveTarget?.name ?? 'This location'} will be archived and hidden from selection lists.`}
           confirmLabel="Archive"
           variant="destructive"
-          onConfirm={() => archive.mutateAsync(archiveTarget!.id)}
+          onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
         />
       </DialogContent>
     </Dialog>

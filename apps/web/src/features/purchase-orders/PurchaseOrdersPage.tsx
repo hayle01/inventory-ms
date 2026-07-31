@@ -34,7 +34,7 @@ export function PurchaseOrdersPage() {
         description="Requests to buy stock from suppliers, from draft through receipt."
         actions={
           canCreate && (
-            <Button onClick={() => setFormOpen(true)}>
+            <Button onClick={() => { setFormOpen(true); }}>
               <Plus />
               New purchase order
             </Button>
@@ -51,7 +51,7 @@ export function PurchaseOrdersPage() {
           title="No purchase orders yet"
           action={
             canCreate && (
-              <Button size="sm" onClick={() => setFormOpen(true)}>
+              <Button size="sm" onClick={() => { setFormOpen(true); }}>
                 <Plus />
                 New purchase order
               </Button>

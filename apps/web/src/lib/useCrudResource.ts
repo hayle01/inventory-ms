@@ -7,6 +7,7 @@ import { apiRequest } from './apiClient';
  * suppliers, ...) that all follow the same
  * `GET /`, `POST /`, `PATCH /:id`, `POST /:id/archive` REST shape.
  */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- TUpdate is part of this hook's public generic contract, even though it currently appears once per call site.
 export function useCrudResource<TDto extends { id: string }, TCreate, TUpdate>(
   queryKey: string,
   basePath: string,

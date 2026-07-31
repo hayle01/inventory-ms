@@ -10,7 +10,7 @@ import { useUnits } from './api';
 interface UnitFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  unit?: UnitDto;
+  unit?: UnitDto | undefined;
 }
 
 export function UnitFormDialog({ open, onOpenChange, unit }: UnitFormDialogProps) {
@@ -45,9 +45,9 @@ export function UnitFormDialog({ open, onOpenChange, unit }: UnitFormDialogProps
 
     const parsedDecimalPlaces = Math.min(6, Math.max(0, Number.parseInt(decimalPlaces, 10) || 0));
 
-    const promise = isEdit
+    const promise = unit
       ? update.mutateAsync({
-          id: unit!.id,
+          id: unit.id,
           payload: { name: name.trim(), symbol: symbol.trim(), decimalPlaces: parsedDecimalPlaces },
         })
       : create.mutateAsync({
@@ -57,7 +57,7 @@ export function UnitFormDialog({ open, onOpenChange, unit }: UnitFormDialogProps
           decimalPlaces: parsedDecimalPlaces,
         });
 
-    void promise.then(() => onOpenChange(false));
+    void promise.then(() => { onOpenChange(false); });
   };
 
   return (
@@ -73,19 +73,19 @@ export function UnitFormDialog({ open, onOpenChange, unit }: UnitFormDialogProps
       {!isEdit && (
         <div className="space-y-1.5">
           <Label htmlFor="unit-code">Code</Label>
-          <Input id="unit-code" value={code} onChange={(event) => setCode(event.target.value)} aria-invalid={Boolean(errors.code)} />
+          <Input id="unit-code" value={code} onChange={(event) => { setCode(event.target.value); }} aria-invalid={Boolean(errors.code)} />
           <FieldError message={errors.code} />
         </div>
       )}
       <div className="space-y-1.5">
         <Label htmlFor="unit-name">Name</Label>
-        <Input id="unit-name" value={name} onChange={(event) => setName(event.target.value)} aria-invalid={Boolean(errors.name)} />
+        <Input id="unit-name" value={name} onChange={(event) => { setName(event.target.value); }} aria-invalid={Boolean(errors.name)} />
         <FieldError message={errors.name} />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label htmlFor="unit-symbol">Symbol</Label>
-          <Input id="unit-symbol" value={symbol} onChange={(event) => setSymbol(event.target.value)} aria-invalid={Boolean(errors.symbol)} />
+          <Input id="unit-symbol" value={symbol} onChange={(event) => { setSymbol(event.target.value); }} aria-invalid={Boolean(errors.symbol)} />
           <FieldError message={errors.symbol} />
         </div>
         <div className="space-y-1.5">
@@ -96,7 +96,7 @@ export function UnitFormDialog({ open, onOpenChange, unit }: UnitFormDialogProps
             min={0}
             max={6}
             value={decimalPlaces}
-            onChange={(event) => setDecimalPlaces(event.target.value)}
+            onChange={(event) => { setDecimalPlaces(event.target.value); }}
           />
         </div>
       </div>

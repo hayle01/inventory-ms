@@ -57,7 +57,6 @@ function DropdownMenuItem({
 function DropdownMenuCheckboxItem({
   className,
   children,
-  checked,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>) {
   return (
@@ -68,7 +67,6 @@ function DropdownMenuCheckboxItem({
         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
         className,
       )}
-      checked={checked}
       {...props}
     >
       <span className="absolute left-2 flex size-3.5 items-center justify-center">

@@ -5,13 +5,13 @@ export type ToastVariant = 'default' | 'success' | 'destructive';
 export interface ToastItem {
   id: string;
   title: string;
-  description?: string;
+  description: string | undefined;
   variant: ToastVariant;
 }
 
 interface ToastContextValue {
   toasts: ToastItem[];
-  toast: (input: { title: string; description?: string; variant?: ToastVariant }) => void;
+  toast: (input: { title: string; description?: string | undefined; variant?: ToastVariant }) => void;
   dismiss: (id: string) => void;
 }
 

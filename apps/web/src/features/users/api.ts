@@ -45,7 +45,7 @@ export function useActivateUser() {
 export function useDeactivateUser() {
   const invalidate = useInvalidateUsers();
   return useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
+    mutationFn: ({ id, reason }: { id: string; reason?: string | undefined }) =>
       apiRequest<UserDto>(`${BASE_PATH}/${id}/deactivate`, { method: 'POST', body: { reason } }),
     onSuccess: invalidate,
   });
@@ -54,7 +54,7 @@ export function useDeactivateUser() {
 export function useArchiveUser() {
   const invalidate = useInvalidateUsers();
   return useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason?: string }) =>
+    mutationFn: ({ id, reason }: { id: string; reason?: string | undefined }) =>
       apiRequest<UserDto>(`${BASE_PATH}/${id}/archive`, { method: 'POST', body: { reason } }),
     onSuccess: invalidate,
   });

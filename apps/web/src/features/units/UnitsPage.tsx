@@ -97,7 +97,7 @@ export function UnitsPage() {
                           Edit
                         </DropdownMenuItem>
                         {unit.status === 'active' && (
-                          <DropdownMenuItem variant="destructive" onSelect={() => setArchiveTarget(unit)}>
+                          <DropdownMenuItem variant="destructive" onSelect={() => { setArchiveTarget(unit); }}>
                             Archive
                           </DropdownMenuItem>
                         )}
@@ -115,12 +115,14 @@ export function UnitsPage() {
 
       <ConfirmDialog
         open={Boolean(archiveTarget)}
-        onOpenChange={(open) => !open && setArchiveTarget(undefined)}
+        onOpenChange={(open) => {
+            if (!open) setArchiveTarget(undefined);
+          }}
         title="Archive unit"
         description={`${archiveTarget?.name ?? 'This unit'} will be archived and hidden from selection lists.`}
         confirmLabel="Archive"
         variant="destructive"
-        onConfirm={() => archive.mutateAsync(archiveTarget!.id)}
+        onConfirm={() => (archiveTarget ? archive.mutateAsync(archiveTarget.id) : Promise.resolve())}
       />
     </main>
   );
