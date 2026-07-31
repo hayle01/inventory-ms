@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  MONGODB_URI: mongodb://localhost:27017/ims_ci?replicaSet=rs0
+  MONGODB_DB_NAME: ims_ci
+  REDIS_URL: redis://localhost:6379
+  APP_BASE_URL: http://localhost:5173
+  API_BASE_URL: http://localhost:4000
+  SESSION_SECRET: ci-session-secret-please-override-64-characters-minimum-length
+  CSRF_SECRET: ci-csrf-secret-please-override-64-characters-minimum-length-x
+  PASSWORD_PEPPER: ci-password-pepper-please-override-64-characters-minimum-len
+  MFA_ENCRYPTION_KEY: ci-mfa-key-please-override-64-characters-minimum-length-xxx
+  CORS_ALLOWED_ORIGINS: http://localhost:5173
+  # Relaxed for CI convenience only -- production uses the strict schema defaults.
+  RATE_LIMIT_LOGIN_MAX: '200'
+  RATE_LIMIT_FORGOT_PASSWORD_MAX: '200'
+  RATE_LIMIT_MFA_MAX: '200'
+  ACCOUNT_LOCKOUT_THRESHOLD: '5'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start single-node MongoDB replica set
+        run: |
+          docker run -d --name mongo -p 27017:27017 mongo:7 --replSet rs0 --bind_ip_all
+          for i in $(seq 1 30); do
+            docker exec mongo mongosh --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1 && break
+            sleep 1
+          done
+          docker exec mongo mongosh --eval 'rs.initiate({ _id: "rs0", members: [{ _id: 0, host: "localhost:27017" }] })'
+          for i in $(seq 1 30); do
+            docker exec mongo mongosh --eval "rs.status().ok" | grep -q 1 && break
+            sleep 1
+          done
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.25.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test:unit
+
+      - name: Verify indexes
+        run: pnpm db:verify-indexes
+
+      - name: Migrations
+        run: pnpm db:migrate
+
+      - name: Integration tests
+        run: pnpm test:integration
+
+      - name: Security tests
+        run: pnpm test:security
+
+      - name: Build
+        run: pnpm build
+
+      - name: Dependency audit
+        run: pnpm audit --audit-level=high
+        continue-on-error: true
