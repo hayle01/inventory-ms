@@ -1,0 +1,10 @@
+{
+  "name": "@inventory-ms/tsconfig",
+  "version": "0.1.0",
+  "private": true,
+  "files": [
+    "base.json",
+    "node-library.json",
+    "react-library.json"
+  ]
+}
