@@ -1,0 +1,7 @@
+{
+  "extends": "@inventory-ms/tsconfig/node-library.json",
+  "compilerOptions": {
+    "noEmit": true
+  },
+  "include": ["src", "*.config.ts"]
+}
