@@ -7,3 +7,5 @@ export * from './organization/index.js';
 export * from './catalog/index.js';
 export * from './suppliers/index.js';
 export * from './procurement/index.js';
+export * from './receiving/index.js';
+export * from './inventory/index.js';
