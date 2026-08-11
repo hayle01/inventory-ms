@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MoreHorizontal, Plus, Truck } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -25,24 +26,17 @@ import { ConfirmDialog } from '@/components/data/ConfirmDialog';
 import { usePermissions } from '@/features/auth/usePermissions';
 import type { SupplierDto } from '@inventory-ms/contracts';
 import { useSuppliers } from './api';
-import { SupplierFormDialog } from './SupplierFormDialog';
 
 export function SuppliersPage() {
   const { has } = usePermissions();
+  const navigate = useNavigate();
   const { list, archive } = useSuppliers();
 
-  const [formOpen, setFormOpen] = React.useState(false);
-  const [formSupplier, setFormSupplier] = React.useState<SupplierDto | undefined>();
   const [archiveTarget, setArchiveTarget] = React.useState<SupplierDto | undefined>();
 
   if (!has('suppliers.view')) return <ForbiddenState module="suppliers" />;
 
   const canManage = has('suppliers.manage');
-
-  const openCreate = () => {
-    setFormSupplier(undefined);
-    setFormOpen(true);
-  };
 
   return (
     <main className="mx-auto max-w-5xl space-y-6 px-4 py-8 sm:px-6">
@@ -51,7 +45,7 @@ export function SuppliersPage() {
         description="Vendors you purchase products from."
         actions={
           canManage && (
-            <Button onClick={openCreate}>
+            <Button onClick={() => void navigate('/apps/suppliers/new')}>
               <Plus />
               New supplier
             </Button>
@@ -98,10 +92,7 @@ export function SuppliersPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          onSelect={() => {
-                            setFormSupplier(supplier);
-                            setFormOpen(true);
-                          }}
+                          onSelect={() => void navigate(`/apps/suppliers/${supplier.id}/edit`)}
                         >
                           Edit
                         </DropdownMenuItem>
@@ -124,8 +115,6 @@ export function SuppliersPage() {
           </TableBody>
         </Table>
       )}
-
-      <SupplierFormDialog open={formOpen} onOpenChange={setFormOpen} supplier={formSupplier} />
 
       <ConfirmDialog
         open={Boolean(archiveTarget)}
