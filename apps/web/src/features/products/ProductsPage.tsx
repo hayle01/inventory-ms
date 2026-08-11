@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MoreHorizontal, Package, Plus, Search } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -27,16 +28,14 @@ import { usePermissions } from '@/features/auth/usePermissions';
 import { useCategories } from '@/features/categories/api';
 import type { ProductDto } from '@inventory-ms/contracts';
 import { useProducts } from './api';
-import { ProductFormDialog } from './ProductFormDialog';
 
 export function ProductsPage() {
   const { has } = usePermissions();
+  const navigate = useNavigate();
   const { list, archive } = useProducts();
   const categories = useCategories();
 
   const [query, setQuery] = React.useState('');
-  const [formOpen, setFormOpen] = React.useState(false);
-  const [formProduct, setFormProduct] = React.useState<ProductDto | undefined>();
   const [archiveTarget, setArchiveTarget] = React.useState<ProductDto | undefined>();
 
   if (!has('products.view')) return <ForbiddenState module="products" />;
@@ -56,11 +55,6 @@ export function ProductsPage() {
     );
   });
 
-  const openCreate = () => {
-    setFormProduct(undefined);
-    setFormOpen(true);
-  };
-
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       <PageHeader
@@ -68,7 +62,7 @@ export function ProductsPage() {
         description="The catalog of items you receive, issue, and track stock for."
         actions={
           canCreate && (
-            <Button onClick={openCreate}>
+            <Button onClick={() => void navigate('/apps/products/new')}>
               <Plus />
               New product
             </Button>
@@ -98,7 +92,7 @@ export function ProductsPage() {
           action={
             !query &&
             canCreate && (
-              <Button size="sm" onClick={openCreate}>
+              <Button size="sm" onClick={() => void navigate('/apps/products/new')}>
                 <Plus />
                 New product
               </Button>
@@ -145,10 +139,7 @@ export function ProductsPage() {
                     <DropdownMenuContent align="end">
                       {canUpdate && (
                         <DropdownMenuItem
-                          onSelect={() => {
-                            setFormProduct(product);
-                            setFormOpen(true);
-                          }}
+                          onSelect={() => void navigate(`/apps/products/${product.id}/edit`)}
                         >
                           Edit
                         </DropdownMenuItem>
@@ -171,8 +162,6 @@ export function ProductsPage() {
           </TableBody>
         </Table>
       )}
-
-      <ProductFormDialog open={formOpen} onOpenChange={setFormOpen} product={formProduct} />
 
       <ConfirmDialog
         open={Boolean(archiveTarget)}

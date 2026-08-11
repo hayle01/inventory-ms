@@ -1,13 +1,15 @@
 import * as React from 'react';
-import { PRODUCT_TYPES, type ProductDto, type ProductType } from '@inventory-ms/contracts';
+import { useNavigate, useParams } from 'react-router-dom';
+import { PRODUCT_TYPES, type ProductType } from '@inventory-ms/contracts';
 import { X } from 'lucide-react';
-import { FormDialog } from '@/components/data/FormDialog';
+import { FormPage, FormSection } from '@/components/data/FormPage';
 import { FieldError } from '@/components/data/FieldError';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -20,19 +22,18 @@ import { useCategories } from '@/features/categories/api';
 import { useUnits } from '@/features/units/api';
 import { useProducts } from './api';
 
-interface ProductFormDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  product?: ProductDto | undefined;
-}
-
+const BACK_TO = '/apps/products';
 const DECIMAL_PATTERN = /^\d+(\.\d+)?$/;
 
-export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDialogProps) {
-  const { create, update } = useProducts();
+export function ProductFormPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { list, create, update } = useProducts();
   const categories = useCategories();
   const units = useUnits();
-  const isEdit = Boolean(product);
+
+  const isEdit = Boolean(id);
+  const product = id ? list.data?.find((entry) => entry.id === id) : undefined;
   const mutation = isEdit ? update : create;
 
   const [sku, setSku] = React.useState('');
@@ -52,9 +53,12 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
   const [barcodes, setBarcodes] = React.useState<string[]>([]);
   const [barcodeInput, setBarcodeInput] = React.useState('');
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const hydrated = React.useRef(false);
 
   React.useEffect(() => {
-    if (!open) return;
+    if (hydrated.current) return;
+    if (isEdit && !product) return;
+    hydrated.current = true;
     setSku(product?.sku ?? '');
     setName(product?.name ?? '');
     setDescription(product?.description ?? '');
@@ -70,9 +74,23 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
     setExpiryWarningDays(String(product?.expiryWarningDays ?? 90));
     setAllowNegativeStock(product?.allowNegativeStock ?? false);
     setBarcodes(product?.barcodes ?? []);
-    setBarcodeInput('');
-    setErrors({});
-  }, [open, product]);
+  }, [isEdit, product]);
+
+  if (isEdit && list.isLoading) {
+    return (
+      <main className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
+        <Skeleton className="h-96" />
+      </main>
+    );
+  }
+
+  if (isEdit && !list.isLoading && !product) {
+    return (
+      <main className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
+        <p className="text-sm text-destructive">Product not found.</p>
+      </main>
+    );
+  }
 
   const addBarcode = () => {
     const value = barcodeInput.trim();
@@ -93,13 +111,15 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
     if (name.trim().length === 0) nextErrors['name'] = 'Name is required.';
     if (!categoryId) nextErrors['categoryId'] = 'Select a category.';
     if (!unitId) nextErrors['unitId'] = 'Select a unit.';
-    if (!DECIMAL_PATTERN.test(purchasePrice.trim()))
+    if (!DECIMAL_PATTERN.test(purchasePrice.trim())) {
       nextErrors['purchasePrice'] = 'Enter a valid non-negative amount.';
+    }
     if (issuePrice.trim().length > 0 && !DECIMAL_PATTERN.test(issuePrice.trim())) {
       nextErrors['issuePrice'] = 'Enter a valid non-negative amount.';
     }
-    if (!DECIMAL_PATTERN.test(reorderLevel.trim()))
+    if (!DECIMAL_PATTERN.test(reorderLevel.trim())) {
       nextErrors['reorderLevel'] = 'Enter a valid non-negative quantity.';
+    }
     if (reorderQuantity.trim().length > 0 && !DECIMAL_PATTERN.test(reorderQuantity.trim())) {
       nextErrors['reorderQuantity'] = 'Enter a valid non-negative quantity.';
     }
@@ -129,174 +149,178 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
       ? update.mutateAsync({ id: product.id, payload: shared })
       : create.mutateAsync({ ...shared, sku: sku.trim().toUpperCase() });
 
-    void promise.then(() => {
-      onOpenChange(false);
-    });
+    void promise.then(() => void navigate(BACK_TO));
   };
 
   return (
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={isEdit ? 'Edit product' : 'New product'}
+    <FormPage
+      title={isEdit ? `Edit ${product?.name ?? 'product'}` : 'New product'}
+      description="Catalog items you receive, issue, and track stock for."
+      backTo={BACK_TO}
       onSubmit={handleSubmit}
       submitLabel={isEdit ? 'Save changes' : 'Create product'}
       isSubmitting={mutation.isPending}
       errorMessage={mutation.isError ? errorMessage(mutation.error) : undefined}
     >
-      <div className="grid grid-cols-2 gap-4">
-        {!isEdit && (
-          <div className="space-y-1.5">
-            <Label htmlFor="product-sku">SKU</Label>
+      <FormSection title="Identity">
+        <div className="grid grid-cols-2 gap-4">
+          {!isEdit && (
+            <div className="space-y-1.5">
+              <Label htmlFor="product-sku">SKU</Label>
+              <Input
+                id="product-sku"
+                value={sku}
+                onChange={(event) => {
+                  setSku(event.target.value);
+                }}
+                aria-invalid={Boolean(errors['sku'])}
+              />
+              <FieldError message={errors['sku']} />
+            </div>
+          )}
+          <div className={isEdit ? 'col-span-2 space-y-1.5' : 'space-y-1.5'}>
+            <Label htmlFor="product-name">Name</Label>
             <Input
-              id="product-sku"
-              value={sku}
+              id="product-name"
+              value={name}
               onChange={(event) => {
-                setSku(event.target.value);
+                setName(event.target.value);
               }}
-              aria-invalid={Boolean(errors['sku'])}
+              aria-invalid={Boolean(errors['name'])}
             />
-            <FieldError message={errors['sku']} />
+            <FieldError message={errors['name']} />
           </div>
-        )}
-        <div className="space-y-1.5 col-span-2">
-          <Label htmlFor="product-name">Name</Label>
-          <Input
-            id="product-name"
-            value={name}
-            onChange={(event) => {
-              setName(event.target.value);
-            }}
-            aria-invalid={Boolean(errors['name'])}
-          />
-          <FieldError message={errors['name']} />
         </div>
-      </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="product-description">Description</Label>
-        <Textarea
-          id="product-description"
-          value={description}
-          onChange={(event) => {
-            setDescription(event.target.value);
-          }}
-          rows={2}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
-          <Label>Category</Label>
-          <Select value={categoryId} onValueChange={setCategoryId}>
-            <SelectTrigger aria-invalid={Boolean(errors['categoryId'])}>
-              <SelectValue placeholder="Select a category" />
+          <Label htmlFor="product-description">Description</Label>
+          <Textarea
+            id="product-description"
+            value={description}
+            onChange={(event) => {
+              setDescription(event.target.value);
+            }}
+            rows={2}
+          />
+        </div>
+      </FormSection>
+
+      <FormSection title="Classification">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label>Category</Label>
+            <Select value={categoryId} onValueChange={setCategoryId}>
+              <SelectTrigger aria-invalid={Boolean(errors['categoryId'])}>
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.list.data?.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError message={errors['categoryId']} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Unit</Label>
+            <Select value={unitId} onValueChange={setUnitId}>
+              <SelectTrigger aria-invalid={Boolean(errors['unitId'])}>
+                <SelectValue placeholder="Select a unit" />
+              </SelectTrigger>
+              <SelectContent>
+                {units.list.data?.map((unit) => (
+                  <SelectItem key={unit.id} value={unit.id}>
+                    {unit.name} ({unit.symbol})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError message={errors['unitId']} />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label>Product type</Label>
+          <Select
+            value={productType}
+            onValueChange={(value) => {
+              setProductType(value as ProductType);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {categories.list.data?.map((category) => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.name}
+              {PRODUCT_TYPES.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {type}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-          <FieldError message={errors['categoryId']} />
         </div>
-        <div className="space-y-1.5">
-          <Label>Unit</Label>
-          <Select value={unitId} onValueChange={setUnitId}>
-            <SelectTrigger aria-invalid={Boolean(errors['unitId'])}>
-              <SelectValue placeholder="Select a unit" />
-            </SelectTrigger>
-            <SelectContent>
-              {units.list.data?.map((unit) => (
-                <SelectItem key={unit.id} value={unit.id}>
-                  {unit.name} ({unit.symbol})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FieldError message={errors['unitId']} />
-        </div>
-      </div>
+      </FormSection>
 
-      <div className="space-y-1.5">
-        <Label>Product type</Label>
-        <Select
-          value={productType}
-          onValueChange={(value) => {
-            setProductType(value as ProductType);
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {PRODUCT_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <FormSection title="Pricing and reorder">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="product-purchasePrice">Purchase price</Label>
+            <Input
+              id="product-purchasePrice"
+              inputMode="decimal"
+              value={purchasePrice}
+              onChange={(event) => {
+                setPurchasePrice(event.target.value);
+              }}
+              aria-invalid={Boolean(errors['purchasePrice'])}
+            />
+            <FieldError message={errors['purchasePrice']} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="product-issuePrice">Issue price (optional)</Label>
+            <Input
+              id="product-issuePrice"
+              inputMode="decimal"
+              value={issuePrice}
+              onChange={(event) => {
+                setIssuePrice(event.target.value);
+              }}
+              aria-invalid={Boolean(errors['issuePrice'])}
+            />
+            <FieldError message={errors['issuePrice']} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="product-reorderLevel">Reorder level</Label>
+            <Input
+              id="product-reorderLevel"
+              inputMode="decimal"
+              value={reorderLevel}
+              onChange={(event) => {
+                setReorderLevel(event.target.value);
+              }}
+              aria-invalid={Boolean(errors['reorderLevel'])}
+            />
+            <FieldError message={errors['reorderLevel']} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="product-reorderQuantity">Reorder quantity (optional)</Label>
+            <Input
+              id="product-reorderQuantity"
+              inputMode="decimal"
+              value={reorderQuantity}
+              onChange={(event) => {
+                setReorderQuantity(event.target.value);
+              }}
+              aria-invalid={Boolean(errors['reorderQuantity'])}
+            />
+            <FieldError message={errors['reorderQuantity']} />
+          </div>
+        </div>
+      </FormSection>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label htmlFor="product-purchasePrice">Purchase price</Label>
-          <Input
-            id="product-purchasePrice"
-            inputMode="decimal"
-            value={purchasePrice}
-            onChange={(event) => {
-              setPurchasePrice(event.target.value);
-            }}
-            aria-invalid={Boolean(errors['purchasePrice'])}
-          />
-          <FieldError message={errors['purchasePrice']} />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="product-issuePrice">Issue price (optional)</Label>
-          <Input
-            id="product-issuePrice"
-            inputMode="decimal"
-            value={issuePrice}
-            onChange={(event) => {
-              setIssuePrice(event.target.value);
-            }}
-            aria-invalid={Boolean(errors['issuePrice'])}
-          />
-          <FieldError message={errors['issuePrice']} />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="product-reorderLevel">Reorder level</Label>
-          <Input
-            id="product-reorderLevel"
-            inputMode="decimal"
-            value={reorderLevel}
-            onChange={(event) => {
-              setReorderLevel(event.target.value);
-            }}
-            aria-invalid={Boolean(errors['reorderLevel'])}
-          />
-          <FieldError message={errors['reorderLevel']} />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="product-reorderQuantity">Reorder quantity (optional)</Label>
-          <Input
-            id="product-reorderQuantity"
-            inputMode="decimal"
-            value={reorderQuantity}
-            onChange={(event) => {
-              setReorderQuantity(event.target.value);
-            }}
-            aria-invalid={Boolean(errors['reorderQuantity'])}
-          />
-          <FieldError message={errors['reorderQuantity']} />
-        </div>
-      </div>
-
-      <div className="space-y-2">
+      <FormSection title="Lot and expiry tracking">
         <div className="flex items-center justify-between rounded-md border border-input px-3 py-2">
           <Label htmlFor="product-trackLots">Track lots</Label>
           <Switch
@@ -340,10 +364,9 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
             onCheckedChange={setAllowNegativeStock}
           />
         </div>
-      </div>
+      </FormSection>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="product-barcode">Barcodes</Label>
+      <FormSection title="Barcodes">
         <div className="flex gap-2">
           <Input
             id="product-barcode"
@@ -357,7 +380,7 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
                 addBarcode();
               }
             }}
-            placeholder="Scan or type a barcode"
+            placeholder="Scan or type a barcode, then press Enter"
           />
         </div>
         {barcodes.length > 0 && (
@@ -378,7 +401,7 @@ export function ProductFormDialog({ open, onOpenChange, product }: ProductFormDi
             ))}
           </div>
         )}
-      </div>
-    </FormDialog>
+      </FormSection>
+    </FormPage>
   );
 }
