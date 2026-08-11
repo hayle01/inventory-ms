@@ -1,4 +1,5 @@
-import { Types, type HydratedDocument } from 'mongoose';
+import { Decimal } from 'decimal.js';
+import { Types, type ClientSession, type HydratedDocument } from 'mongoose';
 import type {
   CreatePurchaseOrderRequest,
   PurchaseOrderItemInput,
@@ -300,6 +301,53 @@ async function transitionStatus(
   });
 
   return po.toObject();
+}
+
+/**
+ * Applies received-quantity deltas from the Receiving module (posting or
+ * reversing a goods receipt) and recomputes the derived receiving status.
+ * Exposed as an application function -- not a shared model -- so Receiving
+ * never imports `PurchaseOrderModel` directly (no cross-module model
+ * imports). Pass a negative delta to undo a reversed receipt's quantities.
+ */
+export async function applyReceivedQuantities(
+  session: ClientSession,
+  organizationId: Types.ObjectId,
+  purchaseOrderId: Types.ObjectId,
+  deltasByProductId: ReadonlyMap<string, Decimal>,
+): Promise<void> {
+  const po = await PurchaseOrderModel.findOne({ _id: purchaseOrderId, organizationId }).session(
+    session,
+  );
+  if (!po) throw new NotFoundError('Purchase order not found.');
+
+  let totalOrdered = new Decimal(0);
+  let totalReceived = new Decimal(0);
+
+  for (const item of po.items) {
+    const delta = deltasByProductId.get(item.productId.toString());
+    if (delta) {
+      const nextReceived = new Decimal(item.receivedQuantity.toString()).plus(delta);
+      item.receivedQuantity = Types.Decimal128.fromString(
+        nextReceived.isNegative() ? '0' : nextReceived.toFixed(),
+      );
+    }
+    totalOrdered = totalOrdered.plus(item.orderedQuantity.toString());
+    totalReceived = totalReceived.plus(item.receivedQuantity.toString());
+  }
+
+  if (
+    po.status === 'approved' ||
+    po.status === 'partially_received' ||
+    po.status === 'fully_received'
+  ) {
+    if (totalReceived.lessThanOrEqualTo(0)) po.status = 'approved';
+    else if (totalReceived.lessThan(totalOrdered)) po.status = 'partially_received';
+    else po.status = 'fully_received';
+  }
+
+  po.version += 1;
+  await po.save({ session });
 }
 
 export async function submitPurchaseOrder(
