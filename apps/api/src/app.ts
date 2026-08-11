@@ -27,6 +27,8 @@ import { unitsRouter } from './modules/catalog/http/unitsRouter.js';
 import { productsRouter } from './modules/catalog/http/productsRouter.js';
 import { suppliersRouter } from './modules/suppliers/http/suppliersRouter.js';
 import { purchaseOrdersRouter } from './modules/procurement/http/purchaseOrdersRouter.js';
+import { goodsReceiptsRouter } from './modules/receiving/http/goodsReceiptsRouter.js';
+import { inventoryRouter } from './modules/inventory/http/inventoryRouter.js';
 
 export function createApp(): Express {
   const app = express();
@@ -67,6 +69,8 @@ export function createApp(): Express {
   app.use('/api/v1/products', productsRouter);
   app.use('/api/v1/suppliers', suppliersRouter);
   app.use('/api/v1/purchase-orders', purchaseOrdersRouter);
+  app.use('/api/v1/goods-receipts', goodsReceiptsRouter);
+  app.use('/api/v1/inventory', inventoryRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
