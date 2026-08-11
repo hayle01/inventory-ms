@@ -5,6 +5,8 @@ import { organizationMigrations } from '../../../modules/organization/migrations
 import { catalogMigrations } from '../../../modules/catalog/migrations/index.js';
 import { supplierMigrations } from '../../../modules/suppliers/migrations/index.js';
 import { procurementMigrations } from '../../../modules/procurement/migrations/index.js';
+import { inventoryMigrations } from '../../../modules/inventory/migrations/index.js';
+import { receivingMigrations } from '../../../modules/receiving/migrations/index.js';
 
 /** All migrations in application order. Each module owns and exports its own list. */
 export const allMigrations: readonly Migration[] = [
@@ -14,4 +16,6 @@ export const allMigrations: readonly Migration[] = [
   ...catalogMigrations,
   ...supplierMigrations,
   ...procurementMigrations,
+  ...inventoryMigrations,
+  ...receivingMigrations,
 ];
