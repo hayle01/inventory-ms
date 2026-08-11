@@ -10,6 +10,8 @@ import '../../../modules/catalog/models/index.js';
 import '../../../modules/suppliers/models/index.js';
 import '../../../modules/procurement/models/index.js';
 import '../../../modules/audit/models/index.js';
+import '../../../modules/inventory/models/index.js';
+import '../../../modules/receiving/models/index.js';
 
 async function verifyIndexes(): Promise<void> {
   const models = listRegisteredModels();
