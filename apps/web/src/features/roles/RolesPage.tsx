@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Lock, Pencil, Plus, ShieldCheck } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -16,29 +16,16 @@ import { ErrorState } from '@/components/data/ErrorState';
 import { EmptyState } from '@/components/data/EmptyState';
 import { ForbiddenState } from '@/components/data/ForbiddenState';
 import { usePermissions } from '@/features/auth/usePermissions';
-import type { RoleDto } from '@inventory-ms/contracts';
 import { useRoles } from './api';
-import { RoleFormDialog } from './RoleFormDialog';
 
 export function RolesPage() {
   const { has } = usePermissions();
+  const navigate = useNavigate();
   const roles = useRoles();
-  const [dialogRole, setDialogRole] = React.useState<RoleDto | undefined>();
-  const [dialogOpen, setDialogOpen] = React.useState(false);
 
   if (!has('roles.view')) return <ForbiddenState module="roles" />;
 
   const canManage = has('roles.manage');
-
-  const openCreate = () => {
-    setDialogRole(undefined);
-    setDialogOpen(true);
-  };
-
-  const openEdit = (role: RoleDto) => {
-    setDialogRole(role);
-    setDialogOpen(true);
-  };
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
@@ -47,7 +34,7 @@ export function RolesPage() {
         description="Bundles of permissions that can be assigned to users."
         actions={
           canManage && (
-            <Button onClick={openCreate}>
+            <Button onClick={() => void navigate('/apps/roles/new')}>
               <Plus />
               New role
             </Button>
@@ -65,7 +52,7 @@ export function RolesPage() {
           description="Create a role to bundle permissions for your team."
           action={
             canManage && (
-              <Button size="sm" onClick={openCreate}>
+              <Button size="sm" onClick={() => void navigate('/apps/roles/new')}>
                 <Plus />
                 New role
               </Button>
@@ -107,9 +94,7 @@ export function RolesPage() {
                       variant="ghost"
                       size="sm"
                       disabled={role.isSystem}
-                      onClick={() => {
-                        openEdit(role);
-                      }}
+                      onClick={() => void navigate(`/apps/roles/${role.id}/edit`)}
                     >
                       <Pencil />
                       Edit
@@ -120,10 +105,6 @@ export function RolesPage() {
             ))}
           </TableBody>
         </Table>
-      )}
-
-      {canManage && (
-        <RoleFormDialog open={dialogOpen} onOpenChange={setDialogOpen} role={dialogRole} />
       )}
     </main>
   );
