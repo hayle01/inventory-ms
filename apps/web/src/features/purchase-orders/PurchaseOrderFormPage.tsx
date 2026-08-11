@@ -1,12 +1,13 @@
 import * as React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
-import type { PurchaseOrderDto } from '@inventory-ms/contracts';
-import { FormDialog } from '@/components/data/FormDialog';
+import { FormPage, FormSection } from '@/components/data/FormPage';
 import { FieldError } from '@/components/data/FieldError';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -26,7 +27,7 @@ import { errorMessage } from '@/lib/errorMessage';
 import { useSuppliers } from '@/features/suppliers/api';
 import { useWarehouses } from '@/features/warehouses/api';
 import { useProducts } from '@/features/products/api';
-import { useCreatePurchaseOrder, useUpdatePurchaseOrder } from './api';
+import { useCreatePurchaseOrder, usePurchaseOrder, useUpdatePurchaseOrder } from './api';
 
 const DECIMAL_PATTERN = /^\d+(\.\d+)?$/;
 
@@ -50,33 +51,32 @@ function emptyLine(): LineItemDraft {
   };
 }
 
-interface PurchaseOrderFormDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  purchaseOrder?: PurchaseOrderDto | undefined;
-}
+export function PurchaseOrderFormPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const isEdit = Boolean(id);
+  const backTo = isEdit ? `/apps/purchase-orders/${String(id)}` : '/apps/purchase-orders';
 
-export function PurchaseOrderFormDialog({
-  open,
-  onOpenChange,
-  purchaseOrder,
-}: PurchaseOrderFormDialogProps) {
-  const isEdit = Boolean(purchaseOrder);
+  const po = usePurchaseOrder(id);
   const suppliers = useSuppliers();
   const warehouses = useWarehouses();
   const products = useProducts();
   const createPO = useCreatePurchaseOrder();
   const updatePO = useUpdatePurchaseOrder();
   const mutation = isEdit ? updatePO : createPO;
+  const purchaseOrder = po.data;
 
   const [supplierId, setSupplierId] = React.useState('');
   const [warehouseId, setWarehouseId] = React.useState('');
   const [notes, setNotes] = React.useState('');
   const [lines, setLines] = React.useState<LineItemDraft[]>([emptyLine()]);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
+  const hydrated = React.useRef(false);
 
   React.useEffect(() => {
-    if (!open) return;
+    if (hydrated.current) return;
+    if (isEdit && !purchaseOrder) return;
+    hydrated.current = true;
     setSupplierId(purchaseOrder?.supplierId ?? '');
     setWarehouseId(purchaseOrder?.warehouseId ?? '');
     setNotes(purchaseOrder?.notes ?? '');
@@ -92,8 +92,37 @@ export function PurchaseOrderFormDialog({
           }))
         : [emptyLine()],
     );
-    setErrors({});
-  }, [open, purchaseOrder]);
+  }, [isEdit, purchaseOrder]);
+
+  if (isEdit && po.isLoading) {
+    return (
+      <main className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
+        <Skeleton className="h-96" />
+      </main>
+    );
+  }
+
+  if (isEdit && !po.isLoading && !purchaseOrder) {
+    return (
+      <main className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
+        <p className="text-sm text-destructive">Purchase order not found.</p>
+      </main>
+    );
+  }
+
+  if (isEdit && purchaseOrder && purchaseOrder.status !== 'draft') {
+    return (
+      <main className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
+        <p className="text-sm text-muted-foreground">
+          Only draft purchase orders can be edited. This order is{' '}
+          {purchaseOrder.status.replace(/_/g, ' ')}.
+        </p>
+        <Button variant="outline" size="sm" onClick={() => void navigate(backTo)}>
+          Back to order
+        </Button>
+      </main>
+    );
+  }
 
   const updateLine = (key: string, patch: Partial<LineItemDraft>) => {
     setLines((current) => current.map((line) => (line.key === key ? { ...line, ...patch } : line)));
@@ -104,8 +133,6 @@ export function PurchaseOrderFormDialog({
       current.length > 1 ? current.filter((line) => line.key !== key) : current,
     );
   };
-
-  const productById = new Map((products.list.data ?? []).map((product) => [product.id, product]));
 
   const lineTotal = (line: LineItemDraft): number => {
     const quantity = Number.parseFloat(line.orderedQuantity) || 0;
@@ -156,60 +183,70 @@ export function PurchaseOrderFormDialog({
           currencyCode: 'USD',
         });
 
-    void promise.then(() => {
-      onOpenChange(false);
-    });
+    void promise.then((result) => void navigate(`/apps/purchase-orders/${result.id}`));
   };
 
   return (
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={isEdit ? 'Edit purchase order' : 'New purchase order'}
+    <FormPage
+      title={isEdit ? `Edit ${purchaseOrder?.poNumber ?? 'purchase order'}` : 'New purchase order'}
       description="Draft purchase orders can be edited until they're submitted for approval."
+      backTo={backTo}
       onSubmit={handleSubmit}
       submitLabel={isEdit ? 'Save changes' : 'Create draft'}
       isSubmitting={mutation.isPending}
       errorMessage={mutation.isError ? errorMessage(mutation.error) : undefined}
     >
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label>Supplier</Label>
-          <Select value={supplierId} onValueChange={setSupplierId}>
-            <SelectTrigger aria-invalid={Boolean(errors['supplierId'])}>
-              <SelectValue placeholder="Select a supplier" />
-            </SelectTrigger>
-            <SelectContent>
-              {suppliers.list.data?.map((supplier) => (
-                <SelectItem key={supplier.id} value={supplier.id}>
-                  {supplier.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FieldError message={errors['supplierId']} />
+      <FormSection title="Order details">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label>Supplier</Label>
+            <Select value={supplierId} onValueChange={setSupplierId}>
+              <SelectTrigger aria-invalid={Boolean(errors['supplierId'])}>
+                <SelectValue placeholder="Select a supplier" />
+              </SelectTrigger>
+              <SelectContent>
+                {suppliers.list.data?.map((supplier) => (
+                  <SelectItem key={supplier.id} value={supplier.id}>
+                    {supplier.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError message={errors['supplierId']} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Destination warehouse</Label>
+            <Select value={warehouseId} onValueChange={setWarehouseId}>
+              <SelectTrigger aria-invalid={Boolean(errors['warehouseId'])}>
+                <SelectValue placeholder="Select a warehouse" />
+              </SelectTrigger>
+              <SelectContent>
+                {warehouses.list.data?.map((warehouse) => (
+                  <SelectItem key={warehouse.id} value={warehouse.id}>
+                    {warehouse.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError message={errors['warehouseId']} />
+          </div>
         </div>
-        <div className="space-y-1.5">
-          <Label>Destination warehouse</Label>
-          <Select value={warehouseId} onValueChange={setWarehouseId}>
-            <SelectTrigger aria-invalid={Boolean(errors['warehouseId'])}>
-              <SelectValue placeholder="Select a warehouse" />
-            </SelectTrigger>
-            <SelectContent>
-              {warehouses.list.data?.map((warehouse) => (
-                <SelectItem key={warehouse.id} value={warehouse.id}>
-                  {warehouse.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <FieldError message={errors['warehouseId']} />
-        </div>
-      </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label>Line items</Label>
+        <div className="space-y-1.5">
+          <Label htmlFor="po-notes">Notes</Label>
+          <Textarea
+            id="po-notes"
+            value={notes}
+            onChange={(event) => {
+              setNotes(event.target.value);
+            }}
+            rows={2}
+          />
+        </div>
+      </FormSection>
+
+      <FormSection title="Line items">
+        <div className="flex justify-end">
           <Button
             type="button"
             variant="outline"
@@ -298,7 +335,6 @@ export function PurchaseOrderFormDialog({
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
                   {lineTotal(line).toFixed(2)}
-                  {productById.get(line.productId) ? '' : ''}
                 </TableCell>
                 <TableCell>
                   <Button
@@ -322,19 +358,7 @@ export function PurchaseOrderFormDialog({
             <FieldError key={key} message={message} />
           ))}
         <p className="text-right text-sm font-medium">Estimated total: {total.toFixed(2)}</p>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="po-notes">Notes</Label>
-        <Textarea
-          id="po-notes"
-          value={notes}
-          onChange={(event) => {
-            setNotes(event.target.value);
-          }}
-          rows={2}
-        />
-      </div>
-    </FormDialog>
+      </FormSection>
+    </FormPage>
   );
 }

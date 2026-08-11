@@ -28,7 +28,7 @@ import {
   useRejectPurchaseOrder,
   useSubmitPurchaseOrder,
 } from './api';
-import { PurchaseOrderFormDialog } from './PurchaseOrderFormDialog';
+import { PurchaseOrderStatusStepper } from './PurchaseOrderStatusStepper';
 import { PO_STATUS_VARIANT } from './statusBadge';
 
 const OPEN_STATUSES = new Set(['draft', 'submitted', 'approved', 'partially_received']);
@@ -47,7 +47,6 @@ export function PurchaseOrderDetailPage() {
   const rejectPO = useRejectPurchaseOrder();
   const cancelPO = useCancelPurchaseOrder();
 
-  const [editOpen, setEditOpen] = React.useState(false);
   const [rejectOpen, setRejectOpen] = React.useState(false);
   const [cancelOpen, setCancelOpen] = React.useState(false);
 
@@ -113,9 +112,7 @@ export function PurchaseOrderDetailPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  setEditOpen(true);
-                }}
+                onClick={() => void navigate(`/apps/purchase-orders/${order.id}/edit`)}
               >
                 <Pencil />
                 Edit
@@ -172,6 +169,12 @@ export function PurchaseOrderDetailPage() {
           </div>
         }
       />
+
+      <Card>
+        <CardContent className="pt-6">
+          <PurchaseOrderStatusStepper status={order.status} />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
@@ -256,8 +259,6 @@ export function PurchaseOrderDetailPage() {
           </CardContent>
         </Card>
       )}
-
-      <PurchaseOrderFormDialog open={editOpen} onOpenChange={setEditOpen} purchaseOrder={order} />
 
       <ConfirmDialog
         open={rejectOpen}

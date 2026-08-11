@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, Plus } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
@@ -19,7 +18,6 @@ import { ForbiddenState } from '@/components/data/ForbiddenState';
 import { usePermissions } from '@/features/auth/usePermissions';
 import { useSuppliers } from '@/features/suppliers/api';
 import { usePurchaseOrders } from './api';
-import { PurchaseOrderFormDialog } from './PurchaseOrderFormDialog';
 import { PO_STATUS_VARIANT } from './statusBadge';
 
 export function PurchaseOrdersPage() {
@@ -27,7 +25,6 @@ export function PurchaseOrdersPage() {
   const navigate = useNavigate();
   const purchaseOrders = usePurchaseOrders();
   const suppliers = useSuppliers();
-  const [formOpen, setFormOpen] = React.useState(false);
 
   if (!has('purchase_orders.view')) return <ForbiddenState module="purchase orders" />;
 
@@ -43,11 +40,7 @@ export function PurchaseOrdersPage() {
         description="Requests to buy stock from suppliers, from draft through receipt."
         actions={
           canCreate && (
-            <Button
-              onClick={() => {
-                setFormOpen(true);
-              }}
-            >
+            <Button onClick={() => void navigate('/apps/purchase-orders/new')}>
               <Plus />
               New purchase order
             </Button>
@@ -64,12 +57,7 @@ export function PurchaseOrdersPage() {
           title="No purchase orders yet"
           action={
             canCreate && (
-              <Button
-                size="sm"
-                onClick={() => {
-                  setFormOpen(true);
-                }}
-              >
+              <Button size="sm" onClick={() => void navigate('/apps/purchase-orders/new')}>
                 <Plus />
                 New purchase order
               </Button>
@@ -116,8 +104,6 @@ export function PurchaseOrdersPage() {
           </TableBody>
         </Table>
       )}
-
-      <PurchaseOrderFormDialog open={formOpen} onOpenChange={setFormOpen} />
     </main>
   );
 }
