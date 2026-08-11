@@ -5,6 +5,7 @@ import {
   ClipboardList,
   KeyRound,
   Package,
+  PackageCheck,
   Ruler,
   ShieldCheck,
   Tags,
@@ -124,5 +125,14 @@ export const APP_MODULES: readonly AppModule[] = [
     icon: ClipboardList,
     tint: 'bg-indigo-600',
     requiredPermission: 'purchase_orders.view',
+  },
+  {
+    key: 'goods-receipts',
+    label: 'Goods Receipts',
+    description: 'Receiving',
+    href: '/apps/goods-receipts',
+    icon: PackageCheck,
+    tint: 'bg-lime-600',
+    requiredPermission: 'receipts.view',
   },
 ] as const;
