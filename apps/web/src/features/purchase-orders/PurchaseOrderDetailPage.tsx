@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Ban, Check, Loader2, Pencil, Send, X } from 'lucide-react';
+import { ArrowLeft, Ban, Check, Loader2, PackageCheck, Pencil, Send, X } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +32,7 @@ import { PurchaseOrderStatusStepper } from './PurchaseOrderStatusStepper';
 import { PO_STATUS_VARIANT } from './statusBadge';
 
 const OPEN_STATUSES = new Set(['draft', 'submitted', 'approved', 'partially_received']);
+const RECEIVABLE_STATUSES = new Set(['approved', 'partially_received']);
 
 export function PurchaseOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -140,6 +141,17 @@ export function PurchaseOrderDetailPage() {
               >
                 {approvePO.isPending ? <Loader2 className="animate-spin" /> : <Check />}
                 Approve
+              </Button>
+            )}
+            {RECEIVABLE_STATUSES.has(order.status) && has('receipts.create') && (
+              <Button
+                size="sm"
+                onClick={() =>
+                  void navigate(`/apps/goods-receipts/new?purchaseOrderId=${order.id}`)
+                }
+              >
+                <PackageCheck />
+                Receive
               </Button>
             )}
             {order.status === 'submitted' && has('purchase_orders.reject') && (
