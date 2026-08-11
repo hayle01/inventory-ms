@@ -20,6 +20,9 @@ import { SupplierFormPage } from '../features/suppliers/SupplierFormPage';
 import { PurchaseOrdersPage } from '../features/purchase-orders/PurchaseOrdersPage';
 import { PurchaseOrderDetailPage } from '../features/purchase-orders/PurchaseOrderDetailPage';
 import { PurchaseOrderFormPage } from '../features/purchase-orders/PurchaseOrderFormPage';
+import { GoodsReceiptsPage } from '../features/goods-receipts/GoodsReceiptsPage';
+import { GoodsReceiptDetailPage } from '../features/goods-receipts/GoodsReceiptDetailPage';
+import { GoodsReceiptFormPage } from '../features/goods-receipts/GoodsReceiptFormPage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/apps" replace /> },
@@ -55,6 +58,10 @@ export const router = createBrowserRouter([
       { path: 'purchase-orders/new', element: <PurchaseOrderFormPage /> },
       { path: 'purchase-orders/:id', element: <PurchaseOrderDetailPage /> },
       { path: 'purchase-orders/:id/edit', element: <PurchaseOrderFormPage /> },
+      { path: 'goods-receipts', element: <GoodsReceiptsPage /> },
+      { path: 'goods-receipts/new', element: <GoodsReceiptFormPage /> },
+      { path: 'goods-receipts/:id', element: <GoodsReceiptDetailPage /> },
+      { path: 'goods-receipts/:id/edit', element: <GoodsReceiptFormPage /> },
     ],
   },
 ]);
