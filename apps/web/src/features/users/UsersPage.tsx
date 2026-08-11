@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MoreHorizontal, Plus, Users as UsersIcon } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
@@ -25,7 +26,6 @@ import { ConfirmDialog } from '@/components/data/ConfirmDialog';
 import { usePermissions } from '@/features/auth/usePermissions';
 import type { UserDto, UserStatus } from '@inventory-ms/contracts';
 import { useActivateUser, useArchiveUser, useDeactivateUser, useUsers } from './api';
-import { UserFormDialog } from './UserFormDialog';
 
 const STATUS_VARIANT: Record<UserStatus, 'success' | 'warning' | 'destructive' | 'muted'> = {
   active: 'success',
@@ -37,13 +37,12 @@ const STATUS_VARIANT: Record<UserStatus, 'success' | 'warning' | 'destructive' |
 
 export function UsersPage() {
   const { has } = usePermissions();
+  const navigate = useNavigate();
   const users = useUsers();
   const activateUser = useActivateUser();
   const deactivateUser = useDeactivateUser();
   const archiveUser = useArchiveUser();
 
-  const [formOpen, setFormOpen] = React.useState(false);
-  const [formUser, setFormUser] = React.useState<UserDto | undefined>();
   const [deactivateTarget, setDeactivateTarget] = React.useState<UserDto | undefined>();
   const [archiveTarget, setArchiveTarget] = React.useState<UserDto | undefined>();
 
@@ -54,11 +53,6 @@ export function UsersPage() {
   const canActivate = has('users.activate');
   const canDeactivate = has('users.deactivate');
 
-  const openCreate = () => {
-    setFormUser(undefined);
-    setFormOpen(true);
-  };
-
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       <PageHeader
@@ -66,7 +60,7 @@ export function UsersPage() {
         description="People with access to this organization's workspace."
         actions={
           canCreate && (
-            <Button onClick={openCreate}>
+            <Button onClick={() => void navigate('/apps/users/new')}>
               <Plus />
               New user
             </Button>
@@ -84,7 +78,7 @@ export function UsersPage() {
           description="Invite your team to start managing inventory together."
           action={
             canCreate && (
-              <Button size="sm" onClick={openCreate}>
+              <Button size="sm" onClick={() => void navigate('/apps/users/new')}>
                 <Plus />
                 New user
               </Button>
@@ -127,10 +121,7 @@ export function UsersPage() {
                     <DropdownMenuContent align="end">
                       {canUpdate && (
                         <DropdownMenuItem
-                          onSelect={() => {
-                            setFormUser(user);
-                            setFormOpen(true);
-                          }}
+                          onSelect={() => void navigate(`/apps/users/${user.id}/edit`)}
                         >
                           Edit
                         </DropdownMenuItem>
@@ -167,8 +158,6 @@ export function UsersPage() {
           </TableBody>
         </Table>
       )}
-
-      <UserFormDialog open={formOpen} onOpenChange={setFormOpen} user={formUser} />
 
       <ConfirmDialog
         open={Boolean(deactivateTarget)}
