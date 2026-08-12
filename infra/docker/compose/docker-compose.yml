@@ -25,9 +25,14 @@ services:
 
   redis:
     image: redis:7-alpine
-    command: ['redis-server', '--save', '', '--appendonly', 'no']
+    # AOF persistence so sessions, idempotency records, and queues survive a
+    # container restart (dev convenience) -- appendfsync everysec balances
+    # durability against write overhead well enough for local/staging use.
+    command: ['redis-server', '--appendonly', 'yes', '--appendfsync', 'everysec']
     ports:
       - '6379:6379'
+    volumes:
+      - redis-data:/data
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
@@ -60,3 +65,4 @@ services:
 volumes:
   mongo-data:
   minio-data:
+  redis-data:
