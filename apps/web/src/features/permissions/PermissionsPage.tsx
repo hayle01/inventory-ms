@@ -1,9 +1,19 @@
+import * as React from 'react';
 import type { PermissionDto } from '@inventory-ms/contracts';
-import { KeyRound } from 'lucide-react';
+import { KeyRound, Search } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { ErrorState } from '@/components/data/ErrorState';
 import { EmptyState } from '@/components/data/EmptyState';
 import { usePermissionCatalog } from './api';
@@ -26,19 +36,46 @@ function groupByModule(permissions: PermissionDto[]): Map<string, PermissionDto[
 
 export function PermissionsPage() {
   const catalog = usePermissionCatalog();
+  const [search, setSearch] = React.useState('');
+
+  const filtered = React.useMemo(() => {
+    if (!catalog.data) return [];
+    const query = search.trim().toLowerCase();
+    if (!query) return catalog.data;
+    return catalog.data.filter(
+      (permission) =>
+        permission.name.toLowerCase().includes(query) ||
+        permission.description.toLowerCase().includes(query),
+    );
+  }, [catalog.data, search]);
+
+  const grouped = React.useMemo(() => Array.from(groupByModule(filtered)), [filtered]);
+  const counts = React.useMemo(() => {
+    const byRisk = { low: 0, medium: 0, high: 0 };
+    for (const permission of catalog.data ?? []) byRisk[permission.riskLevel] += 1;
+    return byRisk;
+  }, [catalog.data]);
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       <PageHeader
         title="Permissions"
         description="The full, read-only catalog of granular permissions available to roles and users."
+        actions={
+          catalog.data && (
+            <div className="flex items-center gap-2 text-sm">
+              <Badge variant="muted">{counts.low} low</Badge>
+              <Badge variant="warning">{counts.medium} medium</Badge>
+              <Badge variant="destructive">{counts.high} high</Badge>
+            </div>
+          )
+        }
       />
 
       {catalog.isLoading && (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="h-40" />
-          ))}
+        <div className="space-y-3">
+          <Skeleton className="h-9 w-full max-w-sm" />
+          <Skeleton className="h-96" />
         </div>
       )}
 
@@ -49,33 +86,62 @@ export function PermissionsPage() {
       )}
 
       {catalog.data && catalog.data.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from(groupByModule(catalog.data)).map(([moduleName, permissions]) => (
-            <Card key={moduleName}>
-              <CardHeader>
-                <CardTitle className="capitalize">{moduleName.replace(/_/g, ' ')}</CardTitle>
-                <CardDescription>{permissions.length} permissions</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {permissions.map((permission) => (
-                  <div
-                    key={permission.name}
-                    className="flex items-center justify-between gap-3 text-sm"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate font-mono text-xs">{permission.name}</p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {permission.description}
-                      </p>
-                    </div>
-                    <Badge variant={RISK_VARIANT[permission.riskLevel]}>
-                      {permission.riskLevel}
-                    </Badge>
-                  </div>
+        <div className="space-y-4">
+          <div className="relative max-w-sm">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              className="pl-8"
+              placeholder="Search permissions…"
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value);
+              }}
+            />
+          </div>
+
+          {grouped.length === 0 ? (
+            <EmptyState icon={Search} title="No permissions match your search" />
+          ) : (
+            <Tabs defaultValue={grouped[0]?.[0] ?? ''}>
+              <TabsList className="h-auto flex-wrap justify-start gap-1 bg-muted/60 p-1">
+                {grouped.map(([moduleName, permissions]) => (
+                  <TabsTrigger key={moduleName} value={moduleName} className="gap-1.5 px-3 py-1.5 capitalize">
+                    {moduleName.replace(/_/g, ' ')}
+                    <span className="text-xs text-muted-foreground">({permissions.length})</span>
+                  </TabsTrigger>
                 ))}
-              </CardContent>
-            </Card>
-          ))}
+              </TabsList>
+
+              {grouped.map(([moduleName, permissions]) => (
+                <TabsContent key={moduleName} value={moduleName} className="mt-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Permission</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead>Risk</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {permissions.map((permission) => (
+                        <TableRow key={permission.name}>
+                          <TableCell className="font-mono text-xs">{permission.name}</TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {permission.description}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={RISK_VARIANT[permission.riskLevel]}>
+                              {permission.riskLevel}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TabsContent>
+              ))}
+            </Tabs>
+          )}
         </div>
       )}
     </main>

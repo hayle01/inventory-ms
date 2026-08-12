@@ -61,7 +61,19 @@ interface RequestOptions {
   idempotencyKey?: string;
 }
 
-async function performRequest<T>(path: string, options: RequestOptions): Promise<T> {
+export interface PaginationMeta {
+  page: number;
+  perPage: number;
+  total: number;
+  hasNext: boolean;
+  correlationId: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- T documents the response payload shape at each call site
+async function performRequestEnvelope<T>(
+  path: string,
+  options: RequestOptions,
+): Promise<{ data: T; meta: PaginationMeta | { correlationId: string } }> {
   const method = options.method ?? 'GET';
   const headers: Record<string, string> = {};
   if (options.body !== undefined) headers['Content-Type'] = 'application/json';
@@ -104,7 +116,12 @@ async function performRequest<T>(path: string, options: RequestOptions): Promise
   const data = (payload as { data?: { csrfToken?: string } }).data;
   if (data?.csrfToken) csrfToken = data.csrfToken;
 
-  return (payload as { data: T }).data;
+  return payload as { data: T; meta: PaginationMeta | { correlationId: string } };
+}
+
+async function performRequest<T>(path: string, options: RequestOptions): Promise<T> {
+  const envelope = await performRequestEnvelope<T>(path, options);
+  return envelope.data;
 }
 
 /**
@@ -126,4 +143,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     await csrfBootstrapPromise;
     return performRequest<T>(path, options);
   }
+}
+
+/** Like `apiRequest`, but also returns the response's pagination `meta` (page/perPage/total/hasNext) for endpoints backed by `sendPaginated`. */
+// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- T documents the response payload shape at each call site
+export async function apiRequestPaginated<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<{ data: T; meta: PaginationMeta }> {
+  const envelope = await performRequestEnvelope<T>(path, options);
+  return envelope as { data: T; meta: PaginationMeta };
 }

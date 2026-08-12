@@ -3,6 +3,7 @@ import { LoginPage } from '../features/auth/LoginPage';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { AppShell } from '../components/layout/AppShell';
 import { AppLauncherPage } from '../features/launcher/AppLauncherPage';
+import { ApprovalsPage } from '../features/approvals/ApprovalsPage';
 import { UsersPage } from '../features/users/UsersPage';
 import { UserFormPage } from '../features/users/UserFormPage';
 import { RolesPage } from '../features/roles/RolesPage';
@@ -23,6 +24,31 @@ import { PurchaseOrderFormPage } from '../features/purchase-orders/PurchaseOrder
 import { GoodsReceiptsPage } from '../features/goods-receipts/GoodsReceiptsPage';
 import { GoodsReceiptDetailPage } from '../features/goods-receipts/GoodsReceiptDetailPage';
 import { GoodsReceiptFormPage } from '../features/goods-receipts/GoodsReceiptFormPage';
+import { StockRequestsPage } from '../features/stock-requests/StockRequestsPage';
+import { StockRequestDetailPage } from '../features/stock-requests/StockRequestDetailPage';
+import { StockRequestFormPage } from '../features/stock-requests/StockRequestFormPage';
+import { StockIssuesPage } from '../features/stock-issues/StockIssuesPage';
+import { StockIssueDetailPage } from '../features/stock-issues/StockIssueDetailPage';
+import { StockReturnsPage } from '../features/stock-returns/StockReturnsPage';
+import { StockReturnDetailPage } from '../features/stock-returns/StockReturnDetailPage';
+import { StockReturnFormPage } from '../features/stock-returns/StockReturnFormPage';
+import { StockAdjustmentsPage } from '../features/stock-adjustments/StockAdjustmentsPage';
+import { StockAdjustmentDetailPage } from '../features/stock-adjustments/StockAdjustmentDetailPage';
+import { StockAdjustmentFormPage } from '../features/stock-adjustments/StockAdjustmentFormPage';
+import { StockTransfersPage } from '../features/stock-transfers/StockTransfersPage';
+import { StockTransferDetailPage } from '../features/stock-transfers/StockTransferDetailPage';
+import { StockTransferFormPage } from '../features/stock-transfers/StockTransferFormPage';
+import { StockCountsPage } from '../features/stock-counts/StockCountsPage';
+import { StockCountDetailPage } from '../features/stock-counts/StockCountDetailPage';
+import { StockCountFormPage } from '../features/stock-counts/StockCountFormPage';
+import { ReportsHubPage } from '../features/reports/ReportsHubPage';
+import { InventoryReportPage } from '../features/reports/InventoryReportPage';
+import { StockMovementReportPage } from '../features/reports/StockMovementReportPage';
+import { PurchasesReportPage } from '../features/reports/PurchasesReportPage';
+import { IssuesReportPage } from '../features/reports/IssuesReportPage';
+import { LowStockReportPage } from '../features/reports/LowStockReportPage';
+import { ExpiryReportPage } from '../features/reports/ExpiryReportPage';
+import { AuditReportPage } from '../features/reports/AuditReportPage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/apps" replace /> },
@@ -36,6 +62,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <AppLauncherPage /> },
+      { path: 'approvals', element: <ApprovalsPage /> },
       { path: 'users', element: <UsersPage /> },
       { path: 'users/new', element: <UserFormPage /> },
       { path: 'users/:id/edit', element: <UserFormPage /> },
@@ -62,6 +89,33 @@ export const router = createBrowserRouter([
       { path: 'goods-receipts/new', element: <GoodsReceiptFormPage /> },
       { path: 'goods-receipts/:id', element: <GoodsReceiptDetailPage /> },
       { path: 'goods-receipts/:id/edit', element: <GoodsReceiptFormPage /> },
+      { path: 'stock-requests', element: <StockRequestsPage /> },
+      { path: 'stock-requests/new', element: <StockRequestFormPage /> },
+      { path: 'stock-requests/:id', element: <StockRequestDetailPage /> },
+      { path: 'stock-requests/:id/edit', element: <StockRequestFormPage /> },
+      { path: 'stock-issues', element: <StockIssuesPage /> },
+      { path: 'stock-issues/:id', element: <StockIssueDetailPage /> },
+      { path: 'stock-returns', element: <StockReturnsPage /> },
+      { path: 'stock-returns/new', element: <StockReturnFormPage /> },
+      { path: 'stock-returns/:id', element: <StockReturnDetailPage /> },
+      { path: 'stock-adjustments', element: <StockAdjustmentsPage /> },
+      { path: 'stock-adjustments/new', element: <StockAdjustmentFormPage /> },
+      { path: 'stock-adjustments/:id', element: <StockAdjustmentDetailPage /> },
+      { path: 'stock-adjustments/:id/edit', element: <StockAdjustmentFormPage /> },
+      { path: 'stock-transfers', element: <StockTransfersPage /> },
+      { path: 'stock-transfers/new', element: <StockTransferFormPage /> },
+      { path: 'stock-transfers/:id', element: <StockTransferDetailPage /> },
+      { path: 'stock-counts', element: <StockCountsPage /> },
+      { path: 'stock-counts/new', element: <StockCountFormPage /> },
+      { path: 'stock-counts/:id', element: <StockCountDetailPage /> },
+      { path: 'reports', element: <ReportsHubPage /> },
+      { path: 'reports/inventory', element: <InventoryReportPage /> },
+      { path: 'reports/stock-movement', element: <StockMovementReportPage /> },
+      { path: 'reports/purchases', element: <PurchasesReportPage /> },
+      { path: 'reports/issues', element: <IssuesReportPage /> },
+      { path: 'reports/low-stock', element: <LowStockReportPage /> },
+      { path: 'reports/expiry', element: <ExpiryReportPage /> },
+      { path: 'reports/audit', element: <AuditReportPage /> },
     ],
   },
 ]);
