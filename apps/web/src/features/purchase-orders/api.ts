@@ -10,10 +10,11 @@ import { apiRequest } from '@/lib/apiClient';
 
 const BASE_PATH = '/api/v1/purchase-orders';
 
-export function usePurchaseOrders() {
+export function usePurchaseOrders(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: ['purchase-orders'],
     queryFn: () => apiRequest<PurchaseOrderDto[]>(BASE_PATH),
+    enabled: options.enabled ?? true,
   });
 }
 
