@@ -29,6 +29,14 @@ import { suppliersRouter } from './modules/suppliers/http/suppliersRouter.js';
 import { purchaseOrdersRouter } from './modules/procurement/http/purchaseOrdersRouter.js';
 import { goodsReceiptsRouter } from './modules/receiving/http/goodsReceiptsRouter.js';
 import { inventoryRouter } from './modules/inventory/http/inventoryRouter.js';
+import { stockRequestsRouter } from './modules/requests/http/stockRequestsRouter.js';
+import { stockIssuesRouter } from './modules/issues/http/stockIssuesRouter.js';
+import { stockReturnsRouter } from './modules/returns/http/stockReturnsRouter.js';
+import { stockAdjustmentsRouter } from './modules/adjustments/http/stockAdjustmentsRouter.js';
+import { stockTransfersRouter } from './modules/transfers/http/stockTransfersRouter.js';
+import { stockCountsRouter } from './modules/counts/http/stockCountsRouter.js';
+import { reportsRouter } from './modules/reports/http/reportsRouter.js';
+import { auditRouter } from './modules/audit/http/auditRouter.js';
 
 export function createApp(): Express {
   const app = express();
@@ -71,6 +79,14 @@ export function createApp(): Express {
   app.use('/api/v1/purchase-orders', purchaseOrdersRouter);
   app.use('/api/v1/goods-receipts', goodsReceiptsRouter);
   app.use('/api/v1/inventory', inventoryRouter);
+  app.use('/api/v1/stock-requests', stockRequestsRouter);
+  app.use('/api/v1/issues', stockIssuesRouter);
+  app.use('/api/v1/returns', stockReturnsRouter);
+  app.use('/api/v1/stock-adjustments', stockAdjustmentsRouter);
+  app.use('/api/v1/stock-transfers', stockTransfersRouter);
+  app.use('/api/v1/stock-counts', stockCountsRouter);
+  app.use('/api/v1/reports', reportsRouter);
+  app.use('/api/v1/audit-events', auditRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

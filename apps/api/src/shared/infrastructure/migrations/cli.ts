@@ -12,6 +12,12 @@ import '../../../modules/procurement/models/index.js';
 import '../../../modules/audit/models/index.js';
 import '../../../modules/inventory/models/index.js';
 import '../../../modules/receiving/models/index.js';
+import '../../../modules/requests/models/index.js';
+import '../../../modules/issues/models/index.js';
+import '../../../modules/returns/models/index.js';
+import '../../../modules/adjustments/models/index.js';
+import '../../../modules/transfers/models/index.js';
+import '../../../modules/counts/models/index.js';
 
 async function verifyIndexes(): Promise<void> {
   const models = listRegisteredModels();

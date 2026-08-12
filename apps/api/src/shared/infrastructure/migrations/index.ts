@@ -7,6 +7,12 @@ import { supplierMigrations } from '../../../modules/suppliers/migrations/index.
 import { procurementMigrations } from '../../../modules/procurement/migrations/index.js';
 import { inventoryMigrations } from '../../../modules/inventory/migrations/index.js';
 import { receivingMigrations } from '../../../modules/receiving/migrations/index.js';
+import { requestsMigrations } from '../../../modules/requests/migrations/index.js';
+import { issuesMigrations } from '../../../modules/issues/migrations/index.js';
+import { returnsMigrations } from '../../../modules/returns/migrations/index.js';
+import { adjustmentsMigrations } from '../../../modules/adjustments/migrations/index.js';
+import { transfersMigrations } from '../../../modules/transfers/migrations/index.js';
+import { countsMigrations } from '../../../modules/counts/migrations/index.js';
 
 /** All migrations in application order. Each module owns and exports its own list. */
 export const allMigrations: readonly Migration[] = [
@@ -18,4 +24,10 @@ export const allMigrations: readonly Migration[] = [
   ...procurementMigrations,
   ...inventoryMigrations,
   ...receivingMigrations,
+  ...requestsMigrations,
+  ...issuesMigrations,
+  ...returnsMigrations,
+  ...adjustmentsMigrations,
+  ...transfersMigrations,
+  ...countsMigrations,
 ];

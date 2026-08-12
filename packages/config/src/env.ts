@@ -71,6 +71,11 @@ export const envSchema = z.object({
   MFA_REQUIRED_FOR_ADMIN: boolFromString(true),
 
   PURCHASE_ORDER_PREVENT_SELF_APPROVAL: boolFromString(true),
+  STOCK_REQUEST_PREVENT_SELF_APPROVAL: boolFromString(true),
+  ADJUSTMENT_PREVENT_SELF_APPROVAL: boolFromString(true),
+  ADJUSTMENT_MATERIAL_QUANTITY_THRESHOLD: z.coerce.number().nonnegative().default(100),
+  TRANSFER_PREVENT_SELF_APPROVAL: boolFromString(true),
+  STOCK_COUNT_PREVENT_SELF_APPROVAL: boolFromString(true),
 });
 
 export type Env = z.infer<typeof envSchema>;

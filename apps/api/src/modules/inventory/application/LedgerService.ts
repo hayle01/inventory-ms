@@ -137,3 +137,107 @@ async function applyBalanceDelta(
     throw new BusinessRuleError('Insufficient available stock to complete this operation.');
   }
 }
+
+/**
+ * Reserves `quantity` of `productId` in `warehouseId` against `available`
+ * stock balance rows, spreading across as many rows as necessary in
+ * deterministic order. Does not pin a specific lot or location -- FEFO/FIFO
+ * lot allocation happens at Issue pick time against whatever capacity is
+ * available then. The per-row conditional update guards against concurrent
+ * over-reservation (`onHandQuantity - reservedQuantity >= take`).
+ */
+export async function reserveStock(
+  organizationId: Types.ObjectId,
+  warehouseId: Types.ObjectId,
+  productId: Types.ObjectId,
+  quantity: string,
+  session: ClientSession,
+): Promise<void> {
+  let remaining = new Decimal(quantity);
+  if (remaining.lessThanOrEqualTo(0)) return;
+
+  const rows = await StockBalanceModel.find({
+    organizationId,
+    warehouseId,
+    productId,
+    stockState: 'available',
+  })
+    .sort({ _id: 1 })
+    .session(session);
+
+  for (const row of rows) {
+    if (remaining.lessThanOrEqualTo(0)) break;
+    const available = new Decimal(row.onHandQuantity.toString()).minus(
+      row.reservedQuantity.toString(),
+    );
+    if (available.lessThanOrEqualTo(0)) continue;
+    const take = Decimal.min(available, remaining);
+
+    const updated = await StockBalanceModel.findOneAndUpdate(
+      {
+        _id: row._id,
+        $expr: {
+          $gte: [
+            { $subtract: ['$onHandQuantity', '$reservedQuantity'] },
+            toDecimal128(take.toFixed()),
+          ],
+        },
+      },
+      { $inc: { reservedQuantity: toDecimal128(take.toFixed()), version: 1 } },
+      { session },
+    );
+    if (updated) remaining = remaining.minus(take);
+  }
+
+  if (remaining.greaterThan(0)) {
+    throw new BusinessRuleError('Insufficient available stock to reserve this quantity.');
+  }
+}
+
+/**
+ * Releases a previously reserved `quantity` of `productId` in `warehouseId`
+ * back to available. As with `reserveStock`, releases are not tied to the
+ * specific row that originally absorbed the reservation -- only the
+ * aggregate `reservedQuantity` for the product/warehouse must net out
+ * correctly, which holds regardless of which row is decremented.
+ */
+export async function releaseReservedStock(
+  organizationId: Types.ObjectId,
+  warehouseId: Types.ObjectId,
+  productId: Types.ObjectId,
+  quantity: string,
+  session: ClientSession,
+): Promise<void> {
+  let remaining = new Decimal(quantity);
+  if (remaining.lessThanOrEqualTo(0)) return;
+
+  const rows = await StockBalanceModel.find({
+    organizationId,
+    warehouseId,
+    productId,
+    stockState: 'available',
+    reservedQuantity: { $gt: toDecimal128('0') },
+  })
+    .sort({ _id: 1 })
+    .session(session);
+
+  for (const row of rows) {
+    if (remaining.lessThanOrEqualTo(0)) break;
+    const reserved = new Decimal(row.reservedQuantity.toString());
+    if (reserved.lessThanOrEqualTo(0)) continue;
+    const take = Decimal.min(reserved, remaining);
+
+    const updated = await StockBalanceModel.findOneAndUpdate(
+      { _id: row._id, reservedQuantity: { $gte: toDecimal128(take.toFixed()) } },
+      { $inc: { reservedQuantity: toDecimal128(take.negated().toFixed()), version: 1 } },
+      { session },
+    );
+    if (updated) remaining = remaining.minus(take);
+  }
+
+  if (remaining.greaterThan(0)) {
+    throw new BusinessRuleError(
+      'Could not release the full reserved quantity for this product -- reserved stock may already differ from expectations.',
+    );
+  }
+}

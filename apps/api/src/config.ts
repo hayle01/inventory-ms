@@ -40,3 +40,20 @@ export const accountLockoutPolicy = {
 export const procurementPolicy = {
   preventSelfApproval: env.PURCHASE_ORDER_PREVENT_SELF_APPROVAL,
 } as const;
+
+export const requestsPolicy = {
+  preventSelfApproval: env.STOCK_REQUEST_PREVENT_SELF_APPROVAL,
+} as const;
+
+export const adjustmentsPolicy = {
+  preventSelfApproval: env.ADJUSTMENT_PREVENT_SELF_APPROVAL,
+  materialQuantityThreshold: env.ADJUSTMENT_MATERIAL_QUANTITY_THRESHOLD,
+} as const;
+
+export const transfersPolicy = {
+  preventSelfApproval: env.TRANSFER_PREVENT_SELF_APPROVAL,
+} as const;
+
+export const countsPolicy = {
+  preventSelfApproval: env.STOCK_COUNT_PREVENT_SELF_APPROVAL,
+} as const;

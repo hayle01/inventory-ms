@@ -1,5 +1,6 @@
 import type { ClientSession, Types } from 'mongoose';
-import { AuditEventModel } from '../models/AuditEvent.js';
+import type { AuditEventsQuery } from '@inventory-ms/contracts';
+import { AuditEventModel, type AuditEventDoc } from '../models/AuditEvent.js';
 
 export interface RecordAuditEventInput {
   organizationId: Types.ObjectId;
@@ -48,4 +49,32 @@ export async function recordAuditEvent(
     ],
     session ? { session } : {},
   );
+}
+
+export async function listAuditEvents(
+  organizationId: Types.ObjectId,
+  query: AuditEventsQuery,
+): Promise<{ items: AuditEventDoc[]; total: number }> {
+  const filter: Record<string, unknown> = { organizationId };
+  if (query.resourceType) filter['resourceType'] = query.resourceType;
+  if (query.action) filter['action'] = query.action;
+  if (query.actorId) filter['actorId'] = query.actorId;
+  if (query.outcome) filter['outcome'] = query.outcome;
+  if (query.dateFrom ?? query.dateTo) {
+    filter['createdAt'] = {
+      ...(query.dateFrom ? { $gte: new Date(query.dateFrom) } : {}),
+      ...(query.dateTo ? { $lte: new Date(query.dateTo) } : {}),
+    };
+  }
+
+  const [items, total] = await Promise.all([
+    AuditEventModel.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((query.page - 1) * query.perPage)
+      .limit(query.perPage)
+      .lean(),
+    AuditEventModel.countDocuments(filter),
+  ]);
+
+  return { items, total };
 }
