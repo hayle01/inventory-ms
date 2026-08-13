@@ -270,6 +270,7 @@ Audit records are append-only for application users. Include actor, time, action
 - Use dead-letter handling and operational alerts.
 - Scheduled jobs use a Redis distributed lock.
 - Notifications, exports, PDF generation, cache refresh, and alert evaluation are asynchronous unless their result is required for transaction integrity.
+- Outbound email (invite links, password-reset links) is sent from the worker via nodemailer over real SMTP (`MAIL_HOST`/`MAIL_PORT`/`MAIL_SECURE`/`MAIL_USER`/`MAIL_PASSWORD`/`MAIL_FROM`), not a local mail-catcher container. If `MAIL_HOST` is unset, the worker logs a warning and skips the send rather than failing the job. Outside production, the API also returns the raw invite/reset token directly in the response body (`POST /users` → `inviteToken`, `POST /auth/forgot-password` → `devResetToken`) so the corresponding `/reset-password?token=...` page is reachable without a working mail transport; both fields are always `null`/omitted in production.
 
 ## Testing rules
 

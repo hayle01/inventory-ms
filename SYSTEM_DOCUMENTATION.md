@@ -359,7 +359,7 @@ All processes -> centralized logs, metrics, traces, and alerts
 | Logging | Structured JSON logger with automatic secret/header redaction |
 | Testing | Unit, API/integration, browser E2E, security, performance, restore tests |
 | Packaging | pnpm workspace monorepo and locked dependencies |
-| Local environment | Docker Compose with MongoDB replica set, Redis, mail catcher, and object storage emulator |
+| Local environment | Docker Compose with MongoDB replica set, Redis, and object storage emulator; outbound email uses real SMTP via nodemailer (`MAIL_HOST` unset disables sending and logs a warning instead) |
 
 Exact package versions are pinned in the repository lockfile and updated through reviewed dependency pull requests.
 
@@ -1442,8 +1442,9 @@ Docker Compose with:
 - React/Express development services;
 - MongoDB replica set;
 - Redis;
-- mail catcher;
 - object-storage emulator.
+
+Outbound email (invite links, password-reset links) is sent through real SMTP via nodemailer, configured with `MAIL_HOST`/`MAIL_PORT`/`MAIL_SECURE`/`MAIL_USER`/`MAIL_PASSWORD`/`MAIL_FROM`. No local mail-catcher container is used. When `MAIL_HOST` is unset, or whenever a developer does not want to wait on real email delivery while testing, the API's create-user and forgot-password responses include the raw invite/reset token directly in the JSON body outside production (`inviteToken` on `POST /users`, `devResetToken` on `POST /auth/forgot-password`) so the corresponding `/reset-password?token=...` page can be opened directly.
 
 ### Shared development
 
@@ -1711,8 +1712,11 @@ OBJECT_STORAGE_BUCKET=ims-private
 OBJECT_STORAGE_ACCESS_KEY=<local-only>
 OBJECT_STORAGE_SECRET_KEY=<local-only>
 
-MAIL_HOST=mailpit
-MAIL_PORT=1025
+MAIL_HOST=<smtp-host>
+MAIL_PORT=587
+MAIL_SECURE=false
+MAIL_USER=<secret-manager-value>
+MAIL_PASSWORD=<secret-manager-value>
 MAIL_FROM=inventory@example.test
 
 LOG_LEVEL=debug
