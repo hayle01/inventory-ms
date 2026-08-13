@@ -78,7 +78,7 @@ export function StockReturnFormPage() {
 
   if (!stockIssueId) {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-destructive">
           Start a return from a posted stock issue&apos;s detail page.
         </p>
@@ -88,7 +88,7 @@ export function StockReturnFormPage() {
 
   if (stockIssue.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <Skeleton className="h-96" />
       </main>
     );
@@ -96,7 +96,7 @@ export function StockReturnFormPage() {
 
   if (stockIssue.isError || !stockIssue.data) {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-destructive">Stock issue not found.</p>
       </main>
     );
@@ -125,7 +125,8 @@ export function StockReturnFormPage() {
         return;
       }
       if (Number(line.quantity) > Number(line.outstanding)) {
-        nextErrors[key] = `Cannot return more than the outstanding picked quantity (${line.outstanding}).`;
+        nextErrors[key] =
+          `Cannot return more than the outstanding picked quantity (${line.outstanding}).`;
       }
     });
 

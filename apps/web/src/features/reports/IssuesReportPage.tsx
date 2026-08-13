@@ -1,7 +1,5 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, ClipboardList, PackageMinus, Undo2 } from 'lucide-react';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { ClipboardList, PackageMinus, Undo2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -44,28 +42,19 @@ export function IssuesReportPage() {
   const columns: ReportColumn<Row>[] = [
     { key: 'number', header: 'Issue number', render: (r) => r.issueNumber },
     { key: 'status', header: 'Status', render: (r) => <Badge variant="outline">{r.status}</Badge> },
-    { key: 'postedAt', header: 'Posted', render: (r) => (r.postedAt ? new Date(r.postedAt).toLocaleDateString() : '—') },
+    {
+      key: 'postedAt',
+      header: 'Posted',
+      render: (r) => (r.postedAt ? new Date(r.postedAt).toLocaleDateString() : '—'),
+    },
     { key: 'picked', header: 'Picked qty', align: 'right', render: (r) => r.pickedQuantity },
     { key: 'returned', header: 'Returned qty', align: 'right', render: (r) => r.returnedQuantity },
   ];
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
-      <Link
-        to="/apps/reports"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to reports
-      </Link>
-
-      <PageHeader
-        title="Requests, issues & returns"
-        description="Request and fulfillment activity, issued and returned quantities."
-      />
-
       <Card>
-        <CardContent className="flex flex-wrap items-end gap-4 pt-6">
+        <CardContent className="flex flex-nowrap items-end gap-4 overflow-x-auto pt-6">
           <div className="space-y-1.5">
             <Label>Warehouse</Label>
             <Select value={warehouseId} onValueChange={setWarehouseId}>

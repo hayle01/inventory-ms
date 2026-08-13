@@ -96,7 +96,7 @@ export function StockRequestFormPage() {
 
   if (isEdit && stockRequest.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <Skeleton className="h-96" />
       </main>
     );
@@ -104,7 +104,7 @@ export function StockRequestFormPage() {
 
   if (isEdit && !stockRequest.isLoading && !existing) {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-destructive">Stock request not found.</p>
       </main>
     );
@@ -112,7 +112,7 @@ export function StockRequestFormPage() {
 
   if (isEdit && existing && existing.status !== 'draft') {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-muted-foreground">
           Only draft stock requests can be edited. This request is {existing.status}.
         </p>
@@ -143,7 +143,10 @@ export function StockRequestFormPage() {
         nextErrors[key] = 'Select a product for every line.';
         return;
       }
-      if (!DECIMAL_PATTERN.test(line.requestedQuantity.trim()) || Number(line.requestedQuantity) <= 0) {
+      if (
+        !DECIMAL_PATTERN.test(line.requestedQuantity.trim()) ||
+        Number(line.requestedQuantity) <= 0
+      ) {
         nextErrors[key] = 'Enter a valid requested quantity greater than zero.';
       }
     });

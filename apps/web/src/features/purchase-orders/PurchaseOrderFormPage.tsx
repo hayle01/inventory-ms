@@ -96,7 +96,7 @@ export function PurchaseOrderFormPage() {
 
   if (isEdit && po.isLoading) {
     return (
-      <main className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <Skeleton className="h-96" />
       </main>
     );
@@ -104,7 +104,7 @@ export function PurchaseOrderFormPage() {
 
   if (isEdit && !po.isLoading && !purchaseOrder) {
     return (
-      <main className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-destructive">Purchase order not found.</p>
       </main>
     );
@@ -112,7 +112,7 @@ export function PurchaseOrderFormPage() {
 
   if (isEdit && purchaseOrder && purchaseOrder.status !== 'draft') {
     return (
-      <main className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-muted-foreground">
           Only draft purchase orders can be edited. This order is{' '}
           {purchaseOrder.status.replace(/_/g, ' ')}.

@@ -1,8 +1,6 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowUpDown, Download, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowUpDown, TrendingDown, TrendingUp } from 'lucide-react';
 import { STOCK_TRANSACTION_TYPES, type StockTransactionType } from '@inventory-ms/contracts';
-import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,7 +20,6 @@ import { useWarehouses } from '@/features/warehouses/api';
 import { useStockMovementReport } from './api';
 import { StatCard } from './components/StatCard';
 import { ReportTable, type ReportColumn } from './components/ReportTable';
-import { downloadCsv, type CsvColumn } from './lib/csv';
 
 const ALL = '__all__';
 const PER_PAGE = 50;
@@ -47,7 +44,8 @@ export function StockMovementReportPage() {
 
   const report = useStockMovementReport({
     warehouseId: warehouseId === ALL ? undefined : warehouseId,
-    transactionType: transactionType === ALL ? undefined : (transactionType as StockTransactionType),
+    transactionType:
+      transactionType === ALL ? undefined : (transactionType as StockTransactionType),
     page,
     perPage: PER_PAGE,
   });
@@ -56,8 +54,20 @@ export function StockMovementReportPage() {
 
   const columns: ReportColumn<Row>[] = [
     { key: 'when', header: 'When', render: (r) => new Date(r.transactionAt).toLocaleString() },
-    { key: 'number', header: 'Transaction', render: (r) => <span className="font-mono text-xs">{r.transactionNumber}</span> },
-    { key: 'type', header: 'Type', render: (r) => <Badge variant="outline" className="capitalize">{r.transactionType}</Badge> },
+    {
+      key: 'number',
+      header: 'Transaction',
+      render: (r) => <span className="font-mono text-xs">{r.transactionNumber}</span>,
+    },
+    {
+      key: 'type',
+      header: 'Type',
+      render: (r) => (
+        <Badge variant="outline" className="capitalize">
+          {r.transactionType}
+        </Badge>
+      ),
+    },
     { key: 'product', header: 'Product', render: (r) => `${r.productName} (${r.productSku})` },
     { key: 'reference', header: 'Reference', render: (r) => r.referenceNumber },
     {
@@ -72,46 +82,10 @@ export function StockMovementReportPage() {
     },
   ];
 
-  const csvColumns: CsvColumn<Row>[] = [
-    { header: 'When', value: (r) => r.transactionAt },
-    { header: 'Transaction', value: (r) => r.transactionNumber },
-    { header: 'Type', value: (r) => r.transactionType },
-    { header: 'Product', value: (r) => `${r.productName} (${r.productSku})` },
-    { header: 'Reference', value: (r) => r.referenceNumber },
-    { header: 'Quantity', value: (r) => r.quantity },
-  ];
-
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
-      <Link
-        to="/apps/reports"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to reports
-      </Link>
-
-      <PageHeader
-        title="Stock movement"
-        description="Every immutable ledger transaction, filterable by warehouse, type, and date."
-        actions={
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!report.data || report.data.rows.length === 0}
-            onClick={() => {
-              if (!report.data) return;
-              downloadCsv('stock-movement-report', csvColumns, report.data.rows);
-            }}
-          >
-            <Download />
-            Export CSV
-          </Button>
-        }
-      />
-
       <Card>
-        <CardContent className="flex flex-wrap items-end gap-4 pt-6">
+        <CardContent className="flex flex-nowrap items-end gap-4 overflow-x-auto pt-6">
           <div className="space-y-1.5">
             <Label>Warehouse</Label>
             <Select
@@ -165,8 +139,18 @@ export function StockMovementReportPage() {
       {report.data && (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <StatCard label="Total in" value={report.data.summary.totalIn} icon={TrendingUp} tone="success" />
-            <StatCard label="Total out" value={report.data.summary.totalOut} icon={TrendingDown} tone="destructive" />
+            <StatCard
+              label="Total in"
+              value={report.data.summary.totalIn}
+              icon={TrendingUp}
+              tone="success"
+            />
+            <StatCard
+              label="Total out"
+              value={report.data.summary.totalOut}
+              icon={TrendingDown}
+              tone="destructive"
+            />
             <StatCard label="Net" value={report.data.summary.net} icon={ArrowUpDown} />
           </div>
 

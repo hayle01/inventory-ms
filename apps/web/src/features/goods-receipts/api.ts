@@ -8,10 +8,11 @@ import { apiRequest } from '@/lib/apiClient';
 
 const BASE_PATH = '/api/v1/goods-receipts';
 
-export function useGoodsReceipts() {
+export function useGoodsReceipts(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['goods-receipts'],
     queryFn: () => apiRequest<GoodsReceiptDto[]>(BASE_PATH),
+    enabled: options?.enabled ?? true,
   });
 }
 

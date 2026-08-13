@@ -50,7 +50,7 @@ export function StockAdjustmentDetailPage() {
 
   if (stockAdjustment.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
         <Skeleton className="h-64" />
       </main>
     );
@@ -58,7 +58,7 @@ export function StockAdjustmentDetailPage() {
 
   if (stockAdjustment.isError || !stockAdjustment.data) {
     return (
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
         <Button
           variant="outline"
           size="sm"
@@ -91,7 +91,7 @@ export function StockAdjustmentDetailPage() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       <Link
         to="/apps/stock-adjustments"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"

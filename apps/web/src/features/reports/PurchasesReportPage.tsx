@@ -1,9 +1,6 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Download, PackageOpen, Receipt, Truck } from 'lucide-react';
+import { PackageOpen, Receipt, Truck } from 'lucide-react';
 import { PURCHASE_ORDER_STATUSES, type PurchaseOrderStatus } from '@inventory-ms/contracts';
-import { PageHeader } from '@/components/layout/PageHeader';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -22,7 +19,6 @@ import { useSuppliers } from '@/features/suppliers/api';
 import { usePurchasesReport } from './api';
 import { StatCard } from './components/StatCard';
 import { ReportTable, type ReportColumn } from './components/ReportTable';
-import { downloadCsv, type CsvColumn } from './lib/csv';
 
 const ALL = '__all__';
 
@@ -54,56 +50,31 @@ export function PurchasesReportPage() {
   const columns: ReportColumn<Row>[] = [
     { key: 'po', header: 'PO number', render: (r) => r.poNumber },
     { key: 'supplier', header: 'Supplier', render: (r) => r.supplierName },
-    { key: 'status', header: 'Status', render: (r) => <Badge variant="outline">{r.status.replace('_', ' ')}</Badge> },
-    { key: 'orderDate', header: 'Order date', render: (r) => (r.orderDate ? new Date(r.orderDate).toLocaleDateString() : '—') },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (r) => <Badge variant="outline">{r.status.replace('_', ' ')}</Badge>,
+    },
+    {
+      key: 'orderDate',
+      header: 'Order date',
+      render: (r) => (r.orderDate ? new Date(r.orderDate).toLocaleDateString() : '—'),
+    },
     { key: 'total', header: 'Total', align: 'right', render: (r) => r.total },
     { key: 'ordered', header: 'Ordered', align: 'right', render: (r) => r.orderedQuantity },
     { key: 'received', header: 'Received', align: 'right', render: (r) => r.receivedQuantity },
-    { key: 'outstanding', header: 'Outstanding', align: 'right', render: (r) => r.outstandingQuantity },
-  ];
-
-  const csvColumns: CsvColumn<Row>[] = [
-    { header: 'PO number', value: (r) => r.poNumber },
-    { header: 'Supplier', value: (r) => r.supplierName },
-    { header: 'Status', value: (r) => r.status },
-    { header: 'Order date', value: (r) => r.orderDate ?? '' },
-    { header: 'Total', value: (r) => r.total },
-    { header: 'Ordered', value: (r) => r.orderedQuantity },
-    { header: 'Received', value: (r) => r.receivedQuantity },
-    { header: 'Outstanding', value: (r) => r.outstandingQuantity },
+    {
+      key: 'outstanding',
+      header: 'Outstanding',
+      align: 'right',
+      render: (r) => r.outstandingQuantity,
+    },
   ];
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
-      <Link
-        to="/apps/reports"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to reports
-      </Link>
-
-      <PageHeader
-        title="Purchases & suppliers"
-        description="Purchase orders, outstanding receipts, and spend by supplier."
-        actions={
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!report.data || report.data.rows.length === 0}
-            onClick={() => {
-              if (!report.data) return;
-              downloadCsv('purchases-report', csvColumns, report.data.rows);
-            }}
-          >
-            <Download />
-            Export CSV
-          </Button>
-        }
-      />
-
       <Card>
-        <CardContent className="flex flex-wrap items-end gap-4 pt-6">
+        <CardContent className="flex flex-nowrap items-end gap-4 overflow-x-auto pt-6">
           <div className="space-y-1.5">
             <Label>Supplier</Label>
             <Select value={supplierId} onValueChange={setSupplierId}>
@@ -152,7 +123,11 @@ export function PurchasesReportPage() {
               icon={PackageOpen}
               tone="warning"
             />
-            <StatCard label="Active suppliers" value={String(report.data.bySupplier.length)} icon={Truck} />
+            <StatCard
+              label="Active suppliers"
+              value={String(report.data.bySupplier.length)}
+              icon={Truck}
+            />
           </div>
 
           {report.data.bySupplier.length > 0 && (
@@ -164,9 +139,24 @@ export function PurchasesReportPage() {
                 <ReportTable
                   columns={[
                     { key: 'supplier', header: 'Supplier', render: (r) => r.supplierName },
-                    { key: 'count', header: 'Purchase orders', align: 'right', render: (r) => String(r.purchaseOrderCount) },
-                    { key: 'value', header: 'Total value', align: 'right', render: (r) => r.totalValue },
-                    { key: 'outstanding', header: 'Outstanding qty', align: 'right', render: (r) => r.totalOutstandingQuantity },
+                    {
+                      key: 'count',
+                      header: 'Purchase orders',
+                      align: 'right',
+                      render: (r) => String(r.purchaseOrderCount),
+                    },
+                    {
+                      key: 'value',
+                      header: 'Total value',
+                      align: 'right',
+                      render: (r) => r.totalValue,
+                    },
+                    {
+                      key: 'outstanding',
+                      header: 'Outstanding qty',
+                      align: 'right',
+                      render: (r) => r.totalOutstandingQuantity,
+                    },
                   ]}
                   rows={report.data.bySupplier}
                   getRowKey={(r) => r.supplierId}
@@ -175,7 +165,11 @@ export function PurchasesReportPage() {
             </Card>
           )}
 
-          <ReportTable columns={columns} rows={report.data.rows} getRowKey={(r) => r.purchaseOrderId} />
+          <ReportTable
+            columns={columns}
+            rows={report.data.rows}
+            getRowKey={(r) => r.purchaseOrderId}
+          />
         </>
       )}
     </main>

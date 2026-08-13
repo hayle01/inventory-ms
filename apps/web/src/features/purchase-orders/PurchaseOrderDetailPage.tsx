@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Ban, Check, Loader2, PackageCheck, Pencil, Send, X } from 'lucide-react';
+import { ArrowLeft, Ban, Check, Lock, Loader2, PackageCheck, Pencil, Send, X } from 'lucide-react';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,10 +20,12 @@ import { useToast } from '@/components/ui/use-toast';
 import { usePermissions } from '@/features/auth/usePermissions';
 import { useSuppliers } from '@/features/suppliers/api';
 import { useWarehouses } from '@/features/warehouses/api';
+import { useGoodsReceipts } from '@/features/goods-receipts/api';
 import { errorMessage } from '@/lib/errorMessage';
 import {
   useApprovePurchaseOrder,
   useCancelPurchaseOrder,
+  useClosePurchaseOrder,
   usePurchaseOrder,
   useRejectPurchaseOrder,
   useSubmitPurchaseOrder,
@@ -43,9 +45,11 @@ export function PurchaseOrderDetailPage() {
   const po = usePurchaseOrder(id);
   const suppliers = useSuppliers();
   const warehouses = useWarehouses();
+  const receipts = useGoodsReceipts({ enabled: has('receipts.view') });
   const submitPO = useSubmitPurchaseOrder();
   const approvePO = useApprovePurchaseOrder();
   const rejectPO = useRejectPurchaseOrder();
+  const closePO = useClosePurchaseOrder();
   const cancelPO = useCancelPurchaseOrder();
 
   const [rejectOpen, setRejectOpen] = React.useState(false);
@@ -53,7 +57,7 @@ export function PurchaseOrderDetailPage() {
 
   if (po.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
         <Skeleton className="h-64" />
       </main>
     );
@@ -61,7 +65,7 @@ export function PurchaseOrderDetailPage() {
 
   if (po.isError || !po.data) {
     return (
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
         <Button variant="outline" size="sm" onClick={() => void navigate('/apps/purchase-orders')}>
           <ArrowLeft />
           Back to purchase orders
@@ -76,6 +80,9 @@ export function PurchaseOrderDetailPage() {
     suppliers.list.data?.find((entry) => entry.id === order.supplierId)?.name ?? '—';
   const warehouseName =
     warehouses.list.data?.find((entry) => entry.id === order.warehouseId)?.name ?? '—';
+  const relatedReceipts = (receipts.data ?? []).filter(
+    (receipt) => receipt.purchaseOrderId === order.id,
+  );
 
   const runTransition = (label: string, promise: Promise<unknown>) => {
     promise
@@ -92,7 +99,7 @@ export function PurchaseOrderDetailPage() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       <Link
         to="/apps/purchase-orders"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -154,6 +161,18 @@ export function PurchaseOrderDetailPage() {
                 Receive
               </Button>
             )}
+            {order.status === 'fully_received' && has('purchase_orders.close') && (
+              <Button
+                size="sm"
+                disabled={closePO.isPending}
+                onClick={() => {
+                  runTransition('Closed', closePO.mutateAsync(order.id));
+                }}
+              >
+                {closePO.isPending ? <Loader2 className="animate-spin" /> : <Lock />}
+                Close
+              </Button>
+            )}
             {order.status === 'submitted' && has('purchase_orders.reject') && (
               <Button
                 variant="destructive"
@@ -183,8 +202,20 @@ export function PurchaseOrderDetailPage() {
       />
 
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="space-y-4 pt-6">
           <PurchaseOrderStatusStepper status={order.status} />
+          {relatedReceipts.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 border-t border-border pt-4">
+              <span className="text-xs font-medium text-muted-foreground">Goods receipts:</span>
+              {relatedReceipts.map((receipt) => (
+                <Link key={receipt.id} to={`/apps/goods-receipts/${receipt.id}`}>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-accent">
+                    {receipt.receiptNumber}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

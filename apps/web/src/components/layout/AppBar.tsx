@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Boxes, ClipboardCheck, LogOut } from 'lucide-react';
+import { ArrowLeft, Boxes, ClipboardCheck, LogOut, UserCircle } from 'lucide-react';
 import { useMe } from '@/features/auth/useMe';
 import { useLogout } from '@/features/auth/useLogout';
 import { usePermissions } from '@/features/auth/usePermissions';
@@ -135,6 +135,11 @@ export function AppBar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{me.data.user.fullName}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => void navigate('/apps/profile')}>
+                <UserCircle />
+                Profile
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"

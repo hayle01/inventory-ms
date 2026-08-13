@@ -48,7 +48,7 @@ export function StockIssueDetailPage() {
 
   if (stockIssue.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
         <Skeleton className="h-64" />
       </main>
     );
@@ -56,7 +56,7 @@ export function StockIssueDetailPage() {
 
   if (stockIssue.isError || !stockIssue.data) {
     return (
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
         <Button variant="outline" size="sm" onClick={() => void navigate('/apps/stock-issues')}>
           <ArrowLeft />
           Back to stock issues
@@ -85,7 +85,7 @@ export function StockIssueDetailPage() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       <Link
         to="/apps/stock-issues"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -206,9 +206,7 @@ export function StockIssueDetailPage() {
                     <p className="font-medium">{item.productName}</p>
                     <p className="font-mono text-xs text-muted-foreground">{item.productSku}</p>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {item.lotNumber ?? '—'}
-                  </TableCell>
+                  <TableCell className="text-muted-foreground">{item.lotNumber ?? '—'}</TableCell>
                   <TableCell>{item.pickedQuantity}</TableCell>
                 </TableRow>
               ))}

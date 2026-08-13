@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -8,9 +8,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { errorMessage } from '@/lib/errorMessage';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -38,18 +40,25 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const [reason, setReason] = React.useState('');
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
-    if (open) setReason('');
+    if (open) {
+      setReason('');
+      setError(null);
+    }
   }, [open]);
 
   const canConfirm = !reasonRequired || reason.trim().length > 0;
 
   const handleConfirm = async () => {
     setIsSubmitting(true);
+    setError(null);
     try {
       await onConfirm(reasonLabel ? reason.trim() || undefined : undefined);
       onOpenChange(false);
+    } catch (caught) {
+      setError(errorMessage(caught));
     } finally {
       setIsSubmitting(false);
     }
@@ -75,6 +84,13 @@ export function ConfirmDialog({
               rows={3}
             />
           </div>
+        )}
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
 
         <AlertDialogFooter>

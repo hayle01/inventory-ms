@@ -1,7 +1,5 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, ShieldAlert } from 'lucide-react';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -57,29 +55,28 @@ export function AuditReportPage() {
 
   const columns: ReportColumn<Row>[] = [
     { key: 'when', header: 'When', render: (r) => new Date(r.createdAt).toLocaleString() },
-    { key: 'action', header: 'Action', render: (r) => <span className="font-mono text-xs">{r.action}</span> },
-    { key: 'resource', header: 'Resource', render: (r) => `${r.resourceType}${r.resourceNumber ? ` (${r.resourceNumber})` : ''}` },
-    { key: 'outcome', header: 'Outcome', render: (r) => <Badge variant={OUTCOME_VARIANT[r.outcome]}>{r.outcome}</Badge> },
+    {
+      key: 'action',
+      header: 'Action',
+      render: (r) => <span className="font-mono text-xs">{r.action}</span>,
+    },
+    {
+      key: 'resource',
+      header: 'Resource',
+      render: (r) => `${r.resourceType}${r.resourceNumber ? ` (${r.resourceNumber})` : ''}`,
+    },
+    {
+      key: 'outcome',
+      header: 'Outcome',
+      render: (r) => <Badge variant={OUTCOME_VARIANT[r.outcome]}>{r.outcome}</Badge>,
+    },
     { key: 'reason', header: 'Reason', render: (r) => r.reason ?? '—' },
   ];
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
-      <Link
-        to="/apps/reports"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to reports
-      </Link>
-
-      <PageHeader
-        title="Audit trail"
-        description="Actor, action, resource, outcome, and reason for every sensitive action -- including denied attempts."
-      />
-
       <Card>
-        <CardContent className="flex flex-wrap items-end gap-4 pt-6">
+        <CardContent className="flex flex-nowrap items-end gap-4 overflow-x-auto pt-6">
           <div className="space-y-1.5">
             <Label htmlFor="audit-resource-type">Resource type</Label>
             <Input
@@ -130,8 +127,8 @@ export function AuditReportPage() {
 
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              {auditEvents.data.meta.total} event{auditEvents.data.meta.total === 1 ? '' : 's'} — page{' '}
-              {auditEvents.data.meta.page}
+              {auditEvents.data.meta.total} event{auditEvents.data.meta.total === 1 ? '' : 's'} —
+              page {auditEvents.data.meta.page}
             </p>
             <div className="flex gap-2">
               <Button

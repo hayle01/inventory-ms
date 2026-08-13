@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Check, Copy } from 'lucide-react';
 import { FormPage, FormSection } from '@/components/data/FormPage';
 import { FieldError } from '@/components/data/FieldError';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useDepartments } from '@/features/departments/api';
 import { useWarehouses } from '@/features/warehouses/api';
 import { useRoles } from '@/features/roles/api';
@@ -48,6 +59,8 @@ export function UserFormPage() {
     username?: string;
     email?: string;
   }>({});
+  const [inviteLink, setInviteLink] = React.useState<string | null>(null);
+  const [copied, setCopied] = React.useState(false);
   const hydrated = React.useRef(false);
 
   React.useEffect(() => {
@@ -64,7 +77,7 @@ export function UserFormPage() {
 
   if (isEdit && users.isLoading) {
     return (
-      <main className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <Skeleton className="h-96" />
       </main>
     );
@@ -72,7 +85,7 @@ export function UserFormPage() {
 
   if (isEdit && !users.isLoading && !user) {
     return (
-      <main className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-destructive">User not found.</p>
       </main>
     );
@@ -99,8 +112,9 @@ export function UserFormPage() {
 
     const departmentValue = departmentId === NO_DEPARTMENT ? null : departmentId;
 
-    const promise = user
-      ? updateUser.mutateAsync({
+    if (user) {
+      void updateUser
+        .mutateAsync({
           id: user.id,
           payload: {
             fullName: fullName.trim(),
@@ -109,16 +123,36 @@ export function UserFormPage() {
             roleIds: Array.from(roleIds),
           },
         })
-      : createUser.mutateAsync({
-          fullName: fullName.trim(),
-          username: username.trim().toLowerCase(),
-          email: email.trim().toLowerCase(),
-          departmentId: departmentValue,
-          warehouseScopeIds: Array.from(warehouseScopeIds),
-          roleIds: Array.from(roleIds),
-        });
+        .then(() => void navigate(BACK_TO));
+      return;
+    }
 
-    void promise.then(() => void navigate(BACK_TO));
+    void createUser
+      .mutateAsync({
+        fullName: fullName.trim(),
+        username: username.trim().toLowerCase(),
+        email: email.trim().toLowerCase(),
+        departmentId: departmentValue,
+        warehouseScopeIds: Array.from(warehouseScopeIds),
+        roleIds: Array.from(roleIds),
+      })
+      .then((created) => {
+        if (created.inviteToken) {
+          setInviteLink(`${window.location.origin}/reset-password?token=${created.inviteToken}`);
+        } else {
+          void navigate(BACK_TO);
+        }
+      });
+  };
+
+  const handleCopyInviteLink = () => {
+    if (!inviteLink) return;
+    void navigator.clipboard.writeText(inviteLink).then(() => {
+      setCopied(true);
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    });
   };
 
   return (
@@ -236,6 +270,46 @@ export function UserFormPage() {
           ))}
         </div>
       </FormSection>
+
+      <Dialog
+        open={inviteLink !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setInviteLink(null);
+            void navigate(BACK_TO);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>User created</DialogTitle>
+            <DialogDescription>
+              Share this one-time link with the new user so they can set their password and sign in.
+              It will not be shown again.
+            </DialogDescription>
+          </DialogHeader>
+          <Alert>
+            <AlertDescription className="break-all font-mono text-xs">
+              {inviteLink}
+            </AlertDescription>
+          </Alert>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleCopyInviteLink}>
+              {copied ? <Check /> : <Copy />}
+              {copied ? 'Copied' : 'Copy link'}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setInviteLink(null);
+                void navigate(BACK_TO);
+              }}
+            >
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </FormPage>
   );
 }

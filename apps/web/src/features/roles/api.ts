@@ -4,10 +4,11 @@ import { apiRequest } from '@/lib/apiClient';
 
 const BASE_PATH = '/api/v1/roles';
 
-export function useRoles() {
+export function useRoles(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['roles'],
     queryFn: () => apiRequest<RoleDto[]>(BASE_PATH),
+    enabled: options?.enabled ?? true,
   });
 }
 

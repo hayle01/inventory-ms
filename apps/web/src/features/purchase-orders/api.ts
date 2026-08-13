@@ -56,7 +56,7 @@ export function useUpdatePurchaseOrder() {
   });
 }
 
-function useTransition(action: 'submit' | 'approve') {
+function useTransition(action: 'submit' | 'approve' | 'close') {
   const invalidate = useInvalidatePurchaseOrders();
   return useMutation({
     mutationFn: (id: string) =>
@@ -73,6 +73,10 @@ export function useSubmitPurchaseOrder() {
 
 export function useApprovePurchaseOrder() {
   return useTransition('approve');
+}
+
+export function useClosePurchaseOrder() {
+  return useTransition('close');
 }
 
 export function useRejectPurchaseOrder() {

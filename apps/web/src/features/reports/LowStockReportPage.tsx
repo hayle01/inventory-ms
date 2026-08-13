@@ -1,8 +1,5 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { AlertTriangle, ArrowLeft, Download, PackageX } from 'lucide-react';
-import { PageHeader } from '@/components/layout/PageHeader';
-import { Button } from '@/components/ui/button';
+import { AlertTriangle, PackageX } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -22,7 +19,6 @@ import { useWarehouses } from '@/features/warehouses/api';
 import { useLowStockReport } from './api';
 import { StatCard } from './components/StatCard';
 import { ReportTable, type ReportColumn } from './components/ReportTable';
-import { downloadCsv, type CsvColumn } from './lib/csv';
 
 const ALL = '__all__';
 
@@ -47,7 +43,11 @@ export function LowStockReportPage() {
   if (!has('reports.view')) return <ForbiddenState module="reports" />;
 
   const columns: ReportColumn<Row>[] = [
-    { key: 'sku', header: 'SKU', render: (r) => <span className="font-mono text-xs">{r.sku}</span> },
+    {
+      key: 'sku',
+      header: 'SKU',
+      render: (r) => <span className="font-mono text-xs">{r.sku}</span>,
+    },
     { key: 'name', header: 'Product', render: (r) => r.name },
     { key: 'warehouse', header: 'Warehouse', render: (r) => r.warehouseName },
     { key: 'onHand', header: 'On hand', align: 'right', render: (r) => r.onHandQuantity },
@@ -64,47 +64,10 @@ export function LowStockReportPage() {
     },
   ];
 
-  const csvColumns: CsvColumn<Row>[] = [
-    { header: 'SKU', value: (r) => r.sku },
-    { header: 'Product', value: (r) => r.name },
-    { header: 'Warehouse', value: (r) => r.warehouseName },
-    { header: 'On hand', value: (r) => r.onHandQuantity },
-    { header: 'Available', value: (r) => r.availableQuantity },
-    { header: 'Reorder level', value: (r) => r.reorderLevel },
-    { header: 'Status', value: (r) => r.severity },
-  ];
-
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
-      <Link
-        to="/apps/reports"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to reports
-      </Link>
-
-      <PageHeader
-        title="Low & out of stock"
-        description="Products at or below their reorder level, or with zero available stock."
-        actions={
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!report.data || report.data.rows.length === 0}
-            onClick={() => {
-              if (!report.data) return;
-              downloadCsv('low-stock-report', csvColumns, report.data.rows);
-            }}
-          >
-            <Download />
-            Export CSV
-          </Button>
-        }
-      />
-
       <Card>
-        <CardContent className="flex flex-wrap items-end gap-4 pt-6">
+        <CardContent className="flex flex-nowrap items-end gap-4 overflow-x-auto pt-6">
           <div className="space-y-1.5">
             <Label>Warehouse</Label>
             <Select value={warehouseId} onValueChange={setWarehouseId}>
@@ -147,7 +110,11 @@ export function LowStockReportPage() {
           {report.data.rows.length === 0 ? (
             <EmptyState icon={PackageX} title="Nothing is low or out of stock" />
           ) : (
-            <ReportTable columns={columns} rows={report.data.rows} getRowKey={(r) => `${r.productId}:${r.warehouseName}`} />
+            <ReportTable
+              columns={columns}
+              rows={report.data.rows}
+              getRowKey={(r) => `${r.productId}:${r.warehouseName}`}
+            />
           )}
         </>
       )}

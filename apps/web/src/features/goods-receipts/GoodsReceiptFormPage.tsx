@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
 import { RECEIPT_ITEM_CONDITIONS, type ReceiptItemCondition } from '@inventory-ms/contracts';
 import { FormPage, FormSection } from '@/components/data/FormPage';
@@ -100,6 +100,40 @@ export function GoodsReceiptFormPage() {
   const locations = useStorageLocations(warehouseId || undefined);
   const productById = new Map((products.list.data ?? []).map((product) => [product.id, product]));
 
+  const applyPurchaseOrderPrefill = (sourcePo: NonNullable<typeof purchaseOrders.data>[number]) => {
+    setSupplierId(sourcePo.supplierId);
+    setWarehouseId(sourcePo.warehouseId);
+    setPurchaseOrderId(sourcePo.id);
+    const outstandingLines: LineItemDraft[] = sourcePo.items
+      .filter((item) => Number(item.orderedQuantity) - Number(item.receivedQuantity) > 0)
+      .map((item) => {
+        const outstanding = (
+          Number(item.orderedQuantity) - Number(item.receivedQuantity)
+        ).toString();
+        return {
+          key: crypto.randomUUID(),
+          productId: item.productId,
+          destinationLocationId: '',
+          receivedQuantity: outstanding,
+          acceptedQuantity: outstanding,
+          unitCost: item.unitCost,
+          condition: 'good',
+          lotNumber: '',
+          manufacturedAt: '',
+          expiresAt: '',
+          notes: '',
+        };
+      });
+    setLines(outstandingLines.length > 0 ? outstandingLines : [emptyLine()]);
+  };
+
+  // The form is still untouched (default single blank line, no supplier
+  // picked yet) -- safe to auto-fill from a PO without clobbering work in
+  // progress. Once the user has started editing, selecting a PO from the
+  // dropdown only sets the link, it no longer overwrites their lines.
+  const isFormUntouched = () =>
+    !supplierId && lines.length === 1 && !lines[0]?.productId && lines[0]?.receivedQuantity === '1';
+
   React.useEffect(() => {
     if (hydrated.current) return;
     if (isEdit && !existing) return;
@@ -109,30 +143,7 @@ export function GoodsReceiptFormPage() {
       const sourcePo = purchaseOrders.data.find((po) => po.id === purchaseOrderIdFromQuery);
       if (sourcePo) {
         hydrated.current = true;
-        setSupplierId(sourcePo.supplierId);
-        setWarehouseId(sourcePo.warehouseId);
-        setPurchaseOrderId(sourcePo.id);
-        const outstandingLines: LineItemDraft[] = sourcePo.items
-          .filter((item) => Number(item.orderedQuantity) - Number(item.receivedQuantity) > 0)
-          .map((item) => {
-            const outstanding = (
-              Number(item.orderedQuantity) - Number(item.receivedQuantity)
-            ).toString();
-            return {
-              key: crypto.randomUUID(),
-              productId: item.productId,
-              destinationLocationId: '',
-              receivedQuantity: outstanding,
-              acceptedQuantity: outstanding,
-              unitCost: item.unitCost,
-              condition: 'good',
-              lotNumber: '',
-              manufacturedAt: '',
-              expiresAt: '',
-              notes: '',
-            };
-          });
-        setLines(outstandingLines.length > 0 ? outstandingLines : [emptyLine()]);
+        applyPurchaseOrderPrefill(sourcePo);
         return;
       }
     }
@@ -160,11 +171,16 @@ export function GoodsReceiptFormPage() {
           }))
         : [emptyLine()],
     );
+    // applyPurchaseOrderPrefill is intentionally omitted -- it's stable in
+    // effect (only reads state via setters), and this effect must run at
+    // most once per mount (guarded by hydrated.current), not on every
+    // render the function identity happens to change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isEdit, existing, purchaseOrderIdFromQuery, purchaseOrders.data]);
 
   if (isEdit && receipt.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <Skeleton className="h-96" />
       </main>
     );
@@ -172,7 +188,7 @@ export function GoodsReceiptFormPage() {
 
   if (isEdit && !receipt.isLoading && !existing) {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-destructive">Goods receipt not found.</p>
       </main>
     );
@@ -180,7 +196,7 @@ export function GoodsReceiptFormPage() {
 
   if (isEdit && existing && existing.status !== 'draft') {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-muted-foreground">
           Only draft goods receipts can be edited. This receipt is {existing.status}.
         </p>
@@ -341,7 +357,15 @@ export function GoodsReceiptFormPage() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label>Purchase order (optional)</Label>
-            <Select value={purchaseOrderId} onValueChange={setPurchaseOrderId}>
+            <Select
+              value={purchaseOrderId}
+              onValueChange={(value) => {
+                setPurchaseOrderId(value);
+                if (value === NO_PURCHASE_ORDER || !isFormUntouched()) return;
+                const sourcePo = purchaseOrders.data?.find((po) => po.id === value);
+                if (sourcePo) applyPurchaseOrderPrefill(sourcePo);
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Direct receipt (no PO)" />
               </SelectTrigger>
@@ -455,6 +479,15 @@ export function GoodsReceiptFormPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {warehouseId && locations.list.data?.length === 0 && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        No locations in this warehouse yet.{' '}
+                        <Link to="/apps/warehouses" className="underline">
+                          Create one
+                        </Link>
+                        .
+                      </p>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Input

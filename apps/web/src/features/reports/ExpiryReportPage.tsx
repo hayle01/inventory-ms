@@ -1,8 +1,5 @@
 import * as React from 'react';
-import { Link } from 'react-router-dom';
-import { AlertOctagon, ArrowLeft, CalendarClock, Download } from 'lucide-react';
-import { PageHeader } from '@/components/layout/PageHeader';
-import { Button } from '@/components/ui/button';
+import { AlertOctagon, CalendarClock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,7 +20,6 @@ import { useWarehouses } from '@/features/warehouses/api';
 import { useExpiryReport } from './api';
 import { StatCard } from './components/StatCard';
 import { ReportTable, type ReportColumn } from './components/ReportTable';
-import { downloadCsv, type CsvColumn } from './lib/csv';
 
 const ALL = '__all__';
 
@@ -62,57 +58,33 @@ export function ExpiryReportPage() {
     { key: 'lot', header: 'Lot', render: (r) => r.lotNumber },
     { key: 'name', header: 'Product', render: (r) => `${r.name} (${r.sku})` },
     { key: 'warehouse', header: 'Warehouse', render: (r) => r.warehouseName },
-    { key: 'expiresAt', header: 'Expires', render: (r) => new Date(r.expiresAt).toLocaleDateString() },
+    {
+      key: 'expiresAt',
+      header: 'Expires',
+      render: (r) => new Date(r.expiresAt).toLocaleDateString(),
+    },
     { key: 'days', header: 'Days', align: 'right', render: (r) => String(r.daysUntilExpiry) },
-    { key: 'remaining', header: 'Remaining qty', align: 'right', render: (r) => r.remainingQuantity },
+    {
+      key: 'remaining',
+      header: 'Remaining qty',
+      align: 'right',
+      render: (r) => r.remainingQuantity,
+    },
     {
       key: 'severity',
       header: 'Status',
-      render: (r) => <Badge variant={SEVERITY_VARIANT[r.severity]} className="capitalize">{r.severity}</Badge>,
+      render: (r) => (
+        <Badge variant={SEVERITY_VARIANT[r.severity]} className="capitalize">
+          {r.severity}
+        </Badge>
+      ),
     },
-  ];
-
-  const csvColumns: CsvColumn<Row>[] = [
-    { header: 'Lot', value: (r) => r.lotNumber },
-    { header: 'Product', value: (r) => `${r.name} (${r.sku})` },
-    { header: 'Warehouse', value: (r) => r.warehouseName },
-    { header: 'Expires', value: (r) => r.expiresAt },
-    { header: 'Days', value: (r) => r.daysUntilExpiry },
-    { header: 'Remaining qty', value: (r) => r.remainingQuantity },
-    { header: 'Status', value: (r) => r.severity },
   ];
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
-      <Link
-        to="/apps/reports"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-4" />
-        Back to reports
-      </Link>
-
-      <PageHeader
-        title="Expiring & expired stock"
-        description="Active lots nearing or past their expiry date, with remaining issuable quantity."
-        actions={
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!report.data || report.data.rows.length === 0}
-            onClick={() => {
-              if (!report.data) return;
-              downloadCsv('expiry-report', csvColumns, report.data.rows);
-            }}
-          >
-            <Download />
-            Export CSV
-          </Button>
-        }
-      />
-
       <Card>
-        <CardContent className="flex flex-wrap items-end gap-4 pt-6">
+        <CardContent className="flex flex-nowrap items-end gap-4 overflow-x-auto pt-6">
           <div className="space-y-1.5">
             <Label>Warehouse</Label>
             <Select value={warehouseId} onValueChange={setWarehouseId}>
@@ -150,9 +122,24 @@ export function ExpiryReportPage() {
       {report.data && (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <StatCard label="Expired" value={String(report.data.totals.expiredCount)} icon={AlertOctagon} tone="destructive" />
-            <StatCard label="Critical (≤ 7 days)" value={String(report.data.totals.criticalCount)} icon={CalendarClock} tone="destructive" />
-            <StatCard label="Warning" value={String(report.data.totals.warningCount)} icon={CalendarClock} tone="warning" />
+            <StatCard
+              label="Expired"
+              value={String(report.data.totals.expiredCount)}
+              icon={AlertOctagon}
+              tone="destructive"
+            />
+            <StatCard
+              label="Critical (≤ 7 days)"
+              value={String(report.data.totals.criticalCount)}
+              icon={CalendarClock}
+              tone="destructive"
+            />
+            <StatCard
+              label="Warning"
+              value={String(report.data.totals.warningCount)}
+              icon={CalendarClock}
+              tone="warning"
+            />
           </div>
 
           {report.data.rows.length === 0 ? (

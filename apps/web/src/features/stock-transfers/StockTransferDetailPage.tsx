@@ -49,7 +49,7 @@ export function StockTransferDetailPage() {
 
   if (stockTransfer.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
         <Skeleton className="h-64" />
       </main>
     );
@@ -57,7 +57,7 @@ export function StockTransferDetailPage() {
 
   if (stockTransfer.isError || !stockTransfer.data) {
     return (
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
         <Button variant="outline" size="sm" onClick={() => void navigate('/apps/stock-transfers')}>
           <ArrowLeft />
           Back to stock transfers
@@ -88,7 +88,7 @@ export function StockTransferDetailPage() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       <Link
         to="/apps/stock-transfers"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"

@@ -1,7 +1,8 @@
+import * as React from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { AlertCircle, Boxes, Loader2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AlertCircle, Boxes, Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react';
 import { loginRequestSchema, type LoginRequest } from '@inventory-ms/contracts';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +15,7 @@ import { useLogin } from './useLogin';
 export function LoginPage() {
   const navigate = useNavigate();
   const login = useLogin();
+  const [showPassword, setShowPassword] = React.useState(false);
   const {
     register,
     handleSubmit,
@@ -46,7 +48,7 @@ export function LoginPage() {
           <p className="text-sm text-muted-foreground">Sign in to continue</p>
         </div>
 
-        <Card>
+        <Card className="rounded-md">
           <CardHeader className="space-y-1">
             <CardTitle className="text-base">Welcome back</CardTitle>
             <CardDescription>Enter your credentials to access your workspace</CardDescription>
@@ -55,13 +57,17 @@ export function LoginPage() {
             <form className="space-y-4" onSubmit={(event) => void onSubmit(event)} noValidate>
               <div className="space-y-1.5">
                 <Label htmlFor="usernameOrEmail">Username or email</Label>
-                <Input
-                  id="usernameOrEmail"
-                  type="text"
-                  autoComplete="username"
-                  aria-invalid={Boolean(errors.usernameOrEmail)}
-                  {...register('usernameOrEmail')}
-                />
+                <div className="relative">
+                  <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="usernameOrEmail"
+                    type="text"
+                    autoComplete="username"
+                    aria-invalid={Boolean(errors.usernameOrEmail)}
+                    className="rounded-md pl-9"
+                    {...register('usernameOrEmail')}
+                  />
+                </div>
                 {errors.usernameOrEmail && (
                   <p role="alert" className="text-xs text-destructive">
                     {errors.usernameOrEmail.message}
@@ -70,14 +76,37 @@ export function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  aria-invalid={Boolean(errors.password)}
-                  {...register('password')}
-                />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">Password</Label>
+                  <Link
+                    to="/forgot-password"
+                    className="text-xs font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    aria-invalid={Boolean(errors.password)}
+                    className="rounded-md px-9"
+                    {...register('password')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPassword((value) => !value);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
                 {errors.password && (
                   <p role="alert" className="text-xs text-destructive">
                     {errors.password.message}
@@ -86,13 +115,13 @@ export function LoginPage() {
               </div>
 
               {errors.root && (
-                <Alert variant="destructive">
+                <Alert variant="destructive" className="rounded-md">
                   <AlertCircle />
                   <AlertDescription>{errors.root.message}</AlertDescription>
                 </Alert>
               )}
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button type="submit" className="w-full rounded-md" disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="animate-spin" />}
                 {isSubmitting ? 'Signing in…' : 'Sign in'}
               </Button>

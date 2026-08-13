@@ -94,6 +94,7 @@ export function UsersPage() {
               <TableHead>Name</TableHead>
               <TableHead>Username</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Roles</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>MFA</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -105,6 +106,9 @@ export function UsersPage() {
                 <TableCell className="font-medium">{user.fullName}</TableCell>
                 <TableCell className="text-muted-foreground">{user.username}</TableCell>
                 <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {user.roleNames.length > 0 ? user.roleNames.join(', ') : '—'}
+                </TableCell>
                 <TableCell>
                   <Badge variant={STATUS_VARIANT[user.status]}>{user.status}</Badge>
                 </TableCell>

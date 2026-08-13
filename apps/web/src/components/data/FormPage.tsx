@@ -24,8 +24,6 @@ interface FormPageProps {
  * FormDialog.
  */
 export function FormPage({
-  title,
-  description,
   backTo,
   children,
   onSubmit,
@@ -37,22 +35,17 @@ export function FormPage({
   const navigate = useNavigate();
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="mb-4 -ml-2"
+        className="mb-6 -ml-2"
         onClick={() => void navigate(backTo)}
       >
         <ArrowLeft />
         Back
       </Button>
-
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
-        {description && <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>}
-      </div>
 
       <form
         className="space-y-6"

@@ -54,7 +54,7 @@ export function StockRequestDetailPage() {
 
   if (stockRequest.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
         <Skeleton className="h-64" />
       </main>
     );
@@ -62,7 +62,7 @@ export function StockRequestDetailPage() {
 
   if (stockRequest.isError || !stockRequest.data) {
     return (
-      <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
         <Button variant="outline" size="sm" onClick={() => void navigate('/apps/stock-requests')}>
           <ArrowLeft />
           Back to stock requests
@@ -106,7 +106,7 @@ export function StockRequestDetailPage() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6 px-4 py-8 sm:px-6">
+    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 sm:px-6">
       <Link
         to="/apps/stock-requests"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
@@ -169,11 +169,7 @@ export function StockRequestDetailPage() {
               </Button>
             )}
             {ISSUABLE_STATUSES.has(doc.status) && has('issues.create') && (
-              <Button
-                size="sm"
-                disabled={createIssue.isPending}
-                onClick={handleCreateIssue}
-              >
+              <Button size="sm" disabled={createIssue.isPending} onClick={handleCreateIssue}>
                 {createIssue.isPending ? <Loader2 className="animate-spin" /> : <PackageMinus />}
                 Issue
               </Button>

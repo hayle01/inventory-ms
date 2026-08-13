@@ -32,11 +32,7 @@ import {
 import { errorMessage } from '@/lib/errorMessage';
 import { useWarehouses, useStorageLocations } from '@/features/warehouses/api';
 import { useProducts } from '@/features/products/api';
-import {
-  useCreateStockAdjustment,
-  useStockAdjustment,
-  useUpdateStockAdjustment,
-} from './api';
+import { useCreateStockAdjustment, useStockAdjustment, useUpdateStockAdjustment } from './api';
 
 const DECIMAL_PATTERN = /^-?\d+(\.\d+)?$/;
 
@@ -109,7 +105,7 @@ export function StockAdjustmentFormPage() {
 
   if (isEdit && stockAdjustment.isLoading) {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <Skeleton className="h-96" />
       </main>
     );
@@ -117,7 +113,7 @@ export function StockAdjustmentFormPage() {
 
   if (isEdit && !stockAdjustment.isLoading && !existing) {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-destructive">Stock adjustment not found.</p>
       </main>
     );
@@ -125,7 +121,7 @@ export function StockAdjustmentFormPage() {
 
   if (isEdit && existing && existing.status !== 'draft') {
     return (
-      <main className="mx-auto max-w-4xl space-y-4 px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-6xl space-y-4 px-4 py-8 sm:px-6">
         <p className="text-sm text-muted-foreground">
           Only draft stock adjustments can be edited. This adjustment is {existing.status}.
         </p>
@@ -161,7 +157,8 @@ export function StockAdjustmentFormPage() {
         return;
       }
       if (!DECIMAL_PATTERN.test(line.quantityDelta.trim()) || Number(line.quantityDelta) === 0) {
-        nextErrors[key] = 'Enter a non-zero delta (negative decreases stock, positive increases it).';
+        nextErrors[key] =
+          'Enter a non-zero delta (negative decreases stock, positive increases it).';
       }
     });
 
@@ -193,7 +190,9 @@ export function StockAdjustmentFormPage() {
 
   return (
     <FormPage
-      title={isEdit ? `Edit ${existing?.adjustmentNumber ?? 'stock adjustment'}` : 'New stock adjustment'}
+      title={
+        isEdit ? `Edit ${existing?.adjustmentNumber ?? 'stock adjustment'}` : 'New stock adjustment'
+      }
       description="Draft adjustments can be edited until they're submitted for approval."
       backTo={backTo}
       onSubmit={handleSubmit}
