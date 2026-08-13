@@ -26,16 +26,23 @@ tests/e2e/      Browser end-to-end tests
 ## Local development
 
 ```bash
-cp .env.example .env            # then fill in real secrets
+# Each app loads its own .env from its own directory -- copy and fill in
+# real secrets for all three. (.env at the repo root is a reference copy
+# only; nothing loads it directly.)
+cp .env.example apps/api/.env
+cp .env.example apps/worker/.env
 cp apps/web/.env.example apps/web/.env
-pnpm install
-pnpm docker:up                  # MongoDB (single-node replica set), Redis, Mailpit, MinIO
+
+pnpm install                    # also builds packages/config and packages/contracts (postinstall)
+pnpm docker:up                  # MongoDB (single-node replica set, port 27018), Redis, MinIO
 pnpm db:migrate
 pnpm seed                       # creates the default organization, permissions, roles, admin user
-pnpm dev:api
-pnpm dev:web
-pnpm dev:worker
+pnpm dev                        # runs api + web + worker together
 ```
+
+New to the team? See [`docs/LOCAL_SERVICES.md`](./docs/LOCAL_SERVICES.md) for how to connect to
+the local Mongo/Redis/MinIO containers, and [`docs/MANUAL_TESTING_GUIDE.md`](./docs/MANUAL_TESTING_GUIDE.md)
+for a full click-through walkthrough of every module once the app is running.
 
 ## Quality gates
 

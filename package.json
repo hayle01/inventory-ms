@@ -8,6 +8,7 @@
   },
   "packageManager": "pnpm@10.25.0",
   "scripts": {
+    "postinstall": "pnpm --filter @inventory-ms/config run build && pnpm --filter @inventory-ms/contracts run build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "pnpm -r --if-present run lint",
@@ -19,6 +20,7 @@
     "test:e2e": "pnpm -r --if-present run test:e2e",
     "db:migrate": "pnpm --filter @inventory-ms/api run db:migrate",
     "db:verify-indexes": "pnpm --filter @inventory-ms/api run db:verify-indexes",
+    "seed": "pnpm --filter @inventory-ms/api run seed",
     "dev": "concurrently -n api,web,worker -c blue,magenta,green \"pnpm:dev:api\" \"pnpm:dev:web\" \"pnpm:dev:worker\"",
     "dev:api": "pnpm --filter @inventory-ms/api run dev",
     "dev:web": "pnpm --filter @inventory-ms/web run dev",
