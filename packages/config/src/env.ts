@@ -45,6 +45,13 @@ export const envSchema = z.object({
   MAIL_USER: z.string().min(1).optional(),
   MAIL_PASSWORD: z.string().min(1).optional(),
   MAIL_FROM: z.string().email().optional(),
+  /**
+   * Optional HTTPS-API mail path, preferred over the SMTP transport above
+   * when set. Some hosts (e.g. Render's free tier) block outbound SMTP
+   * ports entirely; Resend's API sends over regular HTTPS instead, which
+   * is never blocked. See apps/worker/src/mail/resendTransport.ts.
+   */
+  RESEND_API_KEY: z.string().min(1).optional(),
 
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   CORS_ALLOWED_ORIGINS: csvToArray,

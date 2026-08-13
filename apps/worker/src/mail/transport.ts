@@ -27,6 +27,10 @@ export function getMailTransport(): Transporter | undefined {
 }
 
 export async function verifyMailTransport(): Promise<void> {
+  if (env.RESEND_API_KEY) {
+    logger.info('RESEND_API_KEY is set -- outbound email uses the Resend HTTPS API, not SMTP.');
+    return;
+  }
   const transport = getMailTransport();
   if (!transport) {
     logger.warn(

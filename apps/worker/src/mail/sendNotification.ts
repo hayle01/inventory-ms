@@ -2,6 +2,7 @@ import { env } from '../config.js';
 import { logger } from '../logger.js';
 import { NotificationUserModel } from '../models/User.js';
 import { getMailTransport } from './transport.js';
+import { sendViaResend } from './resendTransport.js';
 import { renderNotificationEmail } from './templates.js';
 import type { NotificationJobData } from './types.js';
 
@@ -24,24 +25,43 @@ export async function sendNotification(job: NotificationJobData): Promise<void> 
     return;
   }
 
-  const transport = getMailTransport();
-  if (!transport) {
-    logger.warn(
-      { toUserId: job.toUserId, template: job.template },
-      'MAIL_HOST not configured; skipping notification (no SMTP transport)',
+  const from = env.MAIL_FROM ?? `no-reply@${env.APP_NAME.toLowerCase().replace(/\s+/g, '-')}.local`;
+  const email = renderNotificationEmail(job, user.fullName);
+
+  if (env.RESEND_API_KEY) {
+    await sendViaResend({
+      from,
+      to: user.emailNormalized,
+      subject: email.subject,
+      text: email.text,
+      html: email.html,
+    });
+    logger.info(
+      { toUserId: job.toUserId, template: job.template, transport: 'resend' },
+      'Notification email sent',
     );
     return;
   }
 
-  const email = renderNotificationEmail(job, user.fullName);
+  const transport = getMailTransport();
+  if (!transport) {
+    logger.warn(
+      { toUserId: job.toUserId, template: job.template },
+      'Neither RESEND_API_KEY nor MAIL_HOST is configured; skipping notification',
+    );
+    return;
+  }
 
   await transport.sendMail({
-    from: env.MAIL_FROM ?? `no-reply@${env.APP_NAME.toLowerCase().replace(/\s+/g, '-')}.local`,
+    from,
     to: user.emailNormalized,
     subject: email.subject,
     text: email.text,
     html: email.html,
   });
 
-  logger.info({ toUserId: job.toUserId, template: job.template }, 'Notification email sent');
+  logger.info(
+    { toUserId: job.toUserId, template: job.template, transport: 'smtp' },
+    'Notification email sent',
+  );
 }
