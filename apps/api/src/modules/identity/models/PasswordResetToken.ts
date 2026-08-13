@@ -14,7 +14,12 @@ import { registerModel } from '../../../shared/infrastructure/modelRegistry.js';
 const passwordResetTokenSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, required: true, index: true },
-    tokenHash: { type: String, default: null, unique: true, sparse: true },
+    // No `default: null` here on purpose -- a sparse index only skips
+    // documents where the field is entirely absent, not documents where
+    // it's explicitly null. A default would make every "challenge" doc
+    // (code-only, no token yet) store `tokenHash: null` literally, which
+    // collides with every other one under the unique index.
+    tokenHash: { type: String, unique: true, sparse: true },
     codeHash: { type: String, default: null },
     codeAttempts: { type: Number, required: true, default: 0 },
     createdAt: { type: Date, required: true, default: () => new Date() },
