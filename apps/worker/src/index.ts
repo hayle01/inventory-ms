@@ -1,5 +1,6 @@
 import { createServer } from 'node:http';
 import { Worker, type Job } from 'bullmq';
+import { env } from './config.js';
 import { logger } from './logger.js';
 import { connectMongo, disconnectMongo } from './mongo.js';
 import { closeBullMqConnection, getBullMqConnection } from './redisConnection.js';
@@ -14,8 +15,15 @@ import type { NotificationJobData } from './mail/types.js';
  * deployments, not for a true background-worker service type. This
  * listener exists solely so those hosts see a live HTTP port and don't
  * treat the process as failed; it carries no application traffic.
+ *
+ * Only started in production: locally, this process runs alongside the API
+ * (which binds its own PORT), and both apps' .env files default to the
+ * same port value -- starting this unconditionally collides with the API
+ * on `pnpm dev`. Render always runs each service as its own process with
+ * its own assigned port, so there's no equivalent collision there.
  */
 function startHealthServer(): void {
+  if (env.NODE_ENV !== 'production') return;
   const port = Number(process.env['PORT'] ?? 4000);
   createServer((_req, res) => {
     res.writeHead(200, { 'content-type': 'application/json' });
