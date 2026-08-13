@@ -1,29 +1,44 @@
-import { Worker } from 'bullmq';
+import { Worker, type Job } from 'bullmq';
 import { logger } from './logger.js';
 import { connectMongo, disconnectMongo } from './mongo.js';
 import { closeBullMqConnection, getBullMqConnection } from './redisConnection.js';
 import { QUEUE_NAMES } from './queues/queueNames.js';
+import { sendNotification } from './mail/sendNotification.js';
+import { verifyMailTransport } from './mail/transport.js';
+import type { NotificationJobData } from './mail/types.js';
 
 /**
  * Job processors are registered per module as features land (notifications,
  * exports, alert evaluation, reconciliation). Job payloads must contain IDs
  * only, never full sensitive documents, and processors must be idempotent.
+ * Only `notifications` has a real processor so far -- the rest remain
+ * no-op stubs until exports/alerts/reconciliation are built.
  */
 async function main(): Promise<void> {
   await connectMongo();
+  await verifyMailTransport();
   const connection = getBullMqConnection();
 
-  const workers = Object.values(QUEUE_NAMES).map(
-    (queueName) =>
-      new Worker(
+  const workers = Object.values(QUEUE_NAMES).map((queueName) => {
+    if (queueName === QUEUE_NAMES.notifications) {
+      return new Worker<NotificationJobData>(
         queueName,
-        (job) => {
+        async (job: Job<NotificationJobData>) => {
           logger.info({ queueName, jobId: job.id, jobName: job.name }, 'Processing job');
-          return Promise.resolve();
+          await sendNotification(job.data);
         },
         { connection },
-      ),
-  );
+      );
+    }
+    return new Worker(
+      queueName,
+      (job) => {
+        logger.info({ queueName, jobId: job.id, jobName: job.name }, 'Processing job');
+        return Promise.resolve();
+      },
+      { connection },
+    );
+  });
 
   logger.info({ queues: Object.values(QUEUE_NAMES) }, 'Worker process started');
 

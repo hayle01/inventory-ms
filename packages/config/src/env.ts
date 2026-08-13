@@ -41,6 +41,9 @@ export const envSchema = z.object({
 
   MAIL_HOST: z.string().min(1).optional(),
   MAIL_PORT: z.coerce.number().int().positive().optional(),
+  MAIL_SECURE: boolFromString(false),
+  MAIL_USER: z.string().min(1).optional(),
+  MAIL_PASSWORD: z.string().min(1).optional(),
   MAIL_FROM: z.string().email().optional(),
 
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),

@@ -19,7 +19,7 @@
     "test:e2e": "pnpm -r --if-present run test:e2e",
     "db:migrate": "pnpm --filter @inventory-ms/api run db:migrate",
     "db:verify-indexes": "pnpm --filter @inventory-ms/api run db:verify-indexes",
-    "dev": "concurrently -n api,web -c blue,magenta \"pnpm:dev:api\" \"pnpm:dev:web\"",
+    "dev": "concurrently -n api,web,worker -c blue,magenta,green \"pnpm:dev:api\" \"pnpm:dev:web\" \"pnpm:dev:worker\"",
     "dev:api": "pnpm --filter @inventory-ms/api run dev",
     "dev:web": "pnpm --filter @inventory-ms/web run dev",
     "dev:worker": "pnpm --filter @inventory-ms/worker run dev",
