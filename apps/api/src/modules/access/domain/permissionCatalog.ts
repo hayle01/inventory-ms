@@ -83,6 +83,7 @@ export const SYSTEM_ROLE_PERMISSIONS: Readonly<
     'purchase_orders.approve',
     'purchase_orders.reject',
     'purchase_orders.cancel',
+    'purchase_orders.close',
     'receipts.view',
     'receipts.verify',
     'receipts.post',

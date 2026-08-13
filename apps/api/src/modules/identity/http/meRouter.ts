@@ -8,6 +8,7 @@ import { doubleCsrfProtection, generateToken } from '../../../shared/security/cs
 import { requireAuth } from '../../../shared/security/requireAuth.js';
 import { getAuthContext } from '../../../shared/security/authContext.js';
 import { NotFoundError, ValidationError } from '../../../shared/http/errors.js';
+import { RoleModel } from '../../access/models/Role.js';
 import { UserModel } from '../models/User.js';
 import * as AuthService from '../application/AuthService.js';
 import { listActiveSessions, revokeSessionById } from '../application/SessionService.js';
@@ -23,7 +24,14 @@ meRouter.get(
     const auth = getAuthContext(req);
     const user = await UserModel.findById(auth.userId).lean();
     if (!user) throw new NotFoundError('User not found.');
-    sendSuccess(res, { user: toUserDto(user), permissions: auth.permissions });
+    const roles = await RoleModel.find({
+      _id: { $in: user.roleIds },
+      organizationId: auth.organizationId,
+    })
+      .select({ name: 1 })
+      .lean();
+    const roleNamesById = new Map(roles.map((role) => [role._id.toString(), role.name]));
+    sendSuccess(res, { user: toUserDto(user, roleNamesById), permissions: auth.permissions });
   }),
 );
 

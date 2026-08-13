@@ -11,8 +11,19 @@ import { getAuthContext } from '../../../shared/security/authContext.js';
 import { rateLimit } from '../../../shared/security/rateLimit.js';
 import { rateLimitPolicies } from '../../../config.js';
 import { ValidationError } from '../../../shared/http/errors.js';
+import { RoleModel } from '../../access/models/Role.js';
 import * as UserService from '../application/UserService.js';
 import { toUserDto } from './mappers.js';
+
+async function loadRoleNamesById(
+  organizationId: Types.ObjectId,
+  roleIds: readonly Types.ObjectId[],
+): Promise<Map<string, string>> {
+  const roles = await RoleModel.find({ _id: { $in: roleIds }, organizationId })
+    .select({ name: 1 })
+    .lean();
+  return new Map(roles.map((role) => [role._id.toString(), role.name]));
+}
 
 export const usersRouter: Router = Router();
 
@@ -39,7 +50,12 @@ usersRouter.get(
   asyncHandler(async (req, res) => {
     const auth = getAuthContext(req);
     const users = await UserService.listUsers(auth.organizationId);
-    sendSuccess(res, users.map(toUserDto));
+    const allRoleIds = [...new Set(users.flatMap((user) => user.roleIds))];
+    const roleNamesById = await loadRoleNamesById(auth.organizationId, allRoleIds);
+    sendSuccess(
+      res,
+      users.map((user) => toUserDto(user, roleNamesById)),
+    );
   }),
 );
 
@@ -50,7 +66,7 @@ usersRouter.post(
   validateBody(createUserRequestSchema),
   asyncHandler(async (req, res) => {
     const auth = getAuthContext(req);
-    const user = await UserService.createUser(
+    const { user, devInviteToken } = await UserService.createUser(
       {
         organizationId: auth.organizationId,
         actorId: auth.userId,
@@ -58,7 +74,8 @@ usersRouter.post(
       },
       req.body as Parameters<typeof UserService.createUser>[1],
     );
-    sendSuccess(res, toUserDto(user), 201);
+    const roleNamesById = await loadRoleNamesById(auth.organizationId, user.roleIds);
+    sendSuccess(res, toUserDto(user, roleNamesById, devInviteToken), 201);
   }),
 );
 
@@ -71,7 +88,8 @@ usersRouter.get(
       auth.organizationId,
       parseObjectId(req.params['id']),
     );
-    sendSuccess(res, toUserDto(user));
+    const roleNamesById = await loadRoleNamesById(auth.organizationId, user.roleIds);
+    sendSuccess(res, toUserDto(user, roleNamesById));
   }),
 );
 
@@ -91,7 +109,8 @@ usersRouter.patch(
       parseObjectId(req.params['id']),
       req.body as Parameters<typeof UserService.updateUser>[2],
     );
-    sendSuccess(res, toUserDto(user));
+    const roleNamesById = await loadRoleNamesById(auth.organizationId, user.roleIds);
+    sendSuccess(res, toUserDto(user, roleNamesById));
   }),
 );
 
@@ -109,7 +128,8 @@ usersRouter.post(
       },
       parseObjectId(req.params['id']),
     );
-    sendSuccess(res, toUserDto(user));
+    const roleNamesById = await loadRoleNamesById(auth.organizationId, user.roleIds);
+    sendSuccess(res, toUserDto(user, roleNamesById));
   }),
 );
 
@@ -129,7 +149,8 @@ usersRouter.post(
       parseObjectId(req.params['id']),
       body.reason,
     );
-    sendSuccess(res, toUserDto(user));
+    const roleNamesById = await loadRoleNamesById(auth.organizationId, user.roleIds);
+    sendSuccess(res, toUserDto(user, roleNamesById));
   }),
 );
 
@@ -149,6 +170,7 @@ usersRouter.post(
       parseObjectId(req.params['id']),
       body.reason,
     );
-    sendSuccess(res, toUserDto(user));
+    const roleNamesById = await loadRoleNamesById(auth.organizationId, user.roleIds);
+    sendSuccess(res, toUserDto(user, roleNamesById));
   }),
 );

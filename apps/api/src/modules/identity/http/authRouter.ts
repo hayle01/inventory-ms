@@ -5,6 +5,7 @@ import {
   loginRequestSchema,
   mfaVerifyRequestSchema,
   resetPasswordRequestSchema,
+  verifyResetCodeRequestSchema,
 } from '@inventory-ms/contracts';
 import { asyncHandler } from '../../../shared/http/asyncHandler.js';
 import { sendSuccess } from '../../../shared/http/envelope.js';
@@ -127,6 +128,23 @@ authRouter.post(
   asyncHandler(async (req, res) => {
     const { usernameOrEmail } = req.body as { usernameOrEmail: string };
     const result = await AuthService.forgotPassword(usernameOrEmail, req, req.correlationId);
+    sendSuccess(res, result);
+  }),
+);
+
+const resetCodeLimiter = rateLimit('mfaVerify', rateLimitPolicies.mfaVerify, (req) => {
+  const body = req.body as { challengeId?: string };
+  return body.challengeId ?? clientIp(req);
+});
+
+authRouter.post(
+  '/verify-reset-code',
+  doubleCsrfProtection,
+  resetCodeLimiter,
+  validateBody(verifyResetCodeRequestSchema),
+  asyncHandler(async (req, res) => {
+    const { challengeId, code } = req.body as { challengeId: string; code: string };
+    const result = await AuthService.verifyResetCode(challengeId, code, req.correlationId);
     sendSuccess(res, result);
   }),
 );

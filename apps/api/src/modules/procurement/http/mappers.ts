@@ -39,6 +39,7 @@ export function toPurchaseOrderDto(po: PurchaseOrderDoc): PurchaseOrderDto {
     rejectionReason: po.rejectionReason ?? null,
     cancelledBy: po.cancelledBy ? po.cancelledBy.toString() : null,
     cancellationReason: po.cancellationReason ?? null,
+    closedBy: po.closedBy ? po.closedBy.toString() : null,
     version: po.version,
     createdAt: po.createdAt.toISOString(),
     updatedAt: po.updatedAt.toISOString(),

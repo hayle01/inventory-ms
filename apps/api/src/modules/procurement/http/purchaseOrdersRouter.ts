@@ -158,6 +158,24 @@ purchaseOrdersRouter.post(
 );
 
 purchaseOrdersRouter.post(
+  '/:id/close',
+  requirePermission('purchase_orders.close'),
+  doubleCsrfProtection,
+  asyncHandler(async (req, res) => {
+    const auth = getAuthContext(req);
+    const po = await PurchaseOrderService.closePurchaseOrder(
+      {
+        organizationId: auth.organizationId,
+        actorId: auth.userId,
+        correlationId: req.correlationId,
+      },
+      parseObjectId(req.params['id']),
+    );
+    sendSuccess(res, toPurchaseOrderDto(po));
+  }),
+);
+
+purchaseOrdersRouter.post(
   '/:id/cancel',
   requirePermission('purchase_orders.cancel'),
   doubleCsrfProtection,

@@ -1,6 +1,7 @@
 import { randomBytes, createHash } from 'node:crypto';
 import { Types } from 'mongoose';
 import type { CreateUserRequest, UpdateUserRequest } from '@inventory-ms/contracts';
+import { env } from '../../../config.js';
 import { ConflictError, NotFoundError, ValidationError } from '../../../shared/http/errors.js';
 import { recordAuditEvent } from '../../audit/application/AuditService.js';
 import { enqueueNotification } from '../../../shared/infrastructure/queue.js';
@@ -50,7 +51,7 @@ export interface CreateUserContext {
 export async function createUser(
   context: CreateUserContext,
   input: CreateUserRequest,
-): Promise<UserDoc> {
+): Promise<{ user: UserDoc; devInviteToken: string | null }> {
   await assertRolesBelongToOrg(context.organizationId, input.roleIds);
 
   const existing = await UserModel.findOne({
@@ -97,7 +98,10 @@ export async function createUser(
     correlationId: context.correlationId,
   });
 
-  return user.toObject();
+  return {
+    user: user.toObject(),
+    devInviteToken: env.NODE_ENV !== 'production' ? rawToken : null,
+  };
 }
 
 export async function updateUser(

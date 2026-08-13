@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomInt } from 'node:crypto';
 import type { Request } from 'express';
 import { Types } from 'mongoose';
 import { env } from '../../../config.js';
@@ -234,7 +234,17 @@ export async function logoutAll(req: Request, correlationId: string): Promise<vo
 
 export interface ForgotPasswordResult {
   message: string;
-  devResetToken?: string;
+  /**
+   * Always returned, whether or not the account exists -- a random,
+   * unresolvable id when it doesn't, so the response shape never reveals
+   * account existence. Used to call verifyResetCode().
+   */
+  challengeId: string;
+  devResetCode?: string;
+}
+
+function generateResetCode(): string {
+  return randomInt(0, 1_000_000).toString().padStart(6, '0');
 }
 
 export async function forgotPassword(
@@ -249,11 +259,11 @@ export async function forgotPassword(
   });
 
   if (user) {
-    const rawToken = randomBytes(32).toString('hex');
-    const tokenHash = createHash('sha256').update(rawToken).digest('hex');
-    await PasswordResetTokenModel.create({
+    const code = generateResetCode();
+    const codeHash = createHash('sha256').update(code).digest('hex');
+    const challenge = await PasswordResetTokenModel.create({
       userId: user._id,
-      tokenHash,
+      codeHash,
       expiresAt: new Date(Date.now() + PASSWORD_RESET_TOKEN_TTL_MS),
       requestIpHash: ipHash(req.ip),
     });
@@ -261,7 +271,7 @@ export async function forgotPassword(
     await enqueueNotification({
       template: 'password-reset',
       toUserId: user._id.toString(),
-      data: { resetToken: rawToken },
+      data: { resetCode: code },
     });
 
     await recordAuditEvent({
@@ -276,11 +286,68 @@ export async function forgotPassword(
 
     return {
       message: GENERIC_RESET_MESSAGE,
-      ...(env.NODE_ENV !== 'production' ? { devResetToken: rawToken } : {}),
+      challengeId: challenge._id.toString(),
+      ...(env.NODE_ENV !== 'production' ? { devResetCode: code } : {}),
     };
   }
 
-  return { message: GENERIC_RESET_MESSAGE };
+  // No matching account -- still return a well-formed, unresolvable
+  // challengeId so the response is indistinguishable from the real case.
+  return { message: GENERIC_RESET_MESSAGE, challengeId: new Types.ObjectId().toString() };
+}
+
+const RESET_CODE_MAX_ATTEMPTS = 5;
+const GENERIC_CODE_ERROR = 'Invalid or expired code.';
+
+export async function verifyResetCode(
+  challengeId: string,
+  code: string,
+  correlationId: string,
+): Promise<{ token: string }> {
+  const challenge = await PasswordResetTokenModel.findOne({
+    _id: Types.ObjectId.isValid(challengeId) ? new Types.ObjectId(challengeId) : null,
+    codeHash: { $ne: null },
+    usedAt: null,
+    expiresAt: { $gt: new Date() },
+  });
+  if (!challenge) throw new ValidationError(GENERIC_CODE_ERROR);
+
+  challenge.codeAttempts += 1;
+  const exceededAttempts = challenge.codeAttempts > RESET_CODE_MAX_ATTEMPTS;
+  const codeHash = createHash('sha256').update(code).digest('hex');
+  const matches = !exceededAttempts && challenge.codeHash === codeHash;
+
+  if (!matches) {
+    if (exceededAttempts) challenge.usedAt = new Date();
+    await challenge.save();
+    throw new ValidationError(GENERIC_CODE_ERROR);
+  }
+
+  challenge.usedAt = new Date();
+  await challenge.save();
+
+  const user = await UserModel.findById(challenge.userId);
+  if (!user) throw new ValidationError(GENERIC_CODE_ERROR);
+
+  const rawToken = randomBytes(32).toString('hex');
+  const tokenHash = createHash('sha256').update(rawToken).digest('hex');
+  await PasswordResetTokenModel.create({
+    userId: challenge.userId,
+    tokenHash,
+    expiresAt: new Date(Date.now() + PASSWORD_RESET_TOKEN_TTL_MS),
+  });
+
+  await recordAuditEvent({
+    organizationId: user.organizationId,
+    actorId: user._id,
+    action: 'auth.verify_reset_code',
+    resourceType: 'user',
+    resourceId: user._id,
+    outcome: 'success',
+    correlationId,
+  });
+
+  return { token: rawToken };
 }
 
 export async function resetPassword(

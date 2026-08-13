@@ -53,6 +53,8 @@ const purchaseOrderSchema = new Schema(
     cancelledBy: { type: Schema.Types.ObjectId, default: null },
     cancelledAt: { type: Date, default: null },
     cancellationReason: { type: String, default: null },
+    closedBy: { type: Schema.Types.ObjectId, default: null },
+    closedAt: { type: Date, default: null },
     version: { type: Number, required: true, default: 0 },
   },
   { timestamps: true, collection: 'purchaseOrders' },

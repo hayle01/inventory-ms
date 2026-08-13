@@ -271,7 +271,7 @@ export async function updatePurchaseOrder(
 async function transitionStatus(
   context: OrgActionContext,
   purchaseOrderId: Types.ObjectId,
-  toStatus: 'submitted' | 'approved' | 'rejected' | 'cancelled',
+  toStatus: 'submitted' | 'approved' | 'rejected' | 'cancelled' | 'closed',
   action: string,
   mutate: (po: HydratedDocument<PurchaseOrderDoc>) => void,
   reason?: string,
@@ -396,6 +396,16 @@ export async function rejectPurchaseOrder(
     },
     reason,
   );
+}
+
+export async function closePurchaseOrder(
+  context: OrgActionContext,
+  purchaseOrderId: Types.ObjectId,
+): Promise<PurchaseOrderDoc> {
+  return transitionStatus(context, purchaseOrderId, 'closed', 'purchase_orders.close', (po) => {
+    po.closedBy = context.actorId;
+    po.closedAt = new Date();
+  });
 }
 
 export async function cancelPurchaseOrder(

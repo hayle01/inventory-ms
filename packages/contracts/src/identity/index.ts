@@ -23,15 +23,21 @@ export const forgotPasswordRequestSchema = z.object({
 });
 export type ForgotPasswordRequest = z.infer<typeof forgotPasswordRequestSchema>;
 
+export const verifyResetCodeRequestSchema = z.object({
+  challengeId: z.string().min(1),
+  code: z.string().trim().length(6),
+});
+export type VerifyResetCodeRequest = z.infer<typeof verifyResetCodeRequestSchema>;
+
 export const resetPasswordRequestSchema = z.object({
   token: z.string().min(1),
-  newPassword: z.string().min(12).max(256),
+  newPassword: z.string().min(8).max(256),
 });
 export type ResetPasswordRequest = z.infer<typeof resetPasswordRequestSchema>;
 
 export const changePasswordRequestSchema = z.object({
   currentPassword: z.string().min(1).max(512),
-  newPassword: z.string().min(12).max(256),
+  newPassword: z.string().min(8).max(256),
 });
 export type ChangePasswordRequest = z.infer<typeof changePasswordRequestSchema>;
 
@@ -81,11 +87,21 @@ export const userDtoSchema = z.object({
   departmentId: z.string().nullable(),
   warehouseScopeIds: z.array(z.string()),
   roleIds: z.array(z.string()),
+  roleNames: z.array(z.string()),
   directPermissionNames: z.array(z.enum(PERMISSIONS)),
   mfaEnabled: z.boolean(),
   lastLoginAt: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
+  /**
+   * Only ever populated on the response to `POST /users` (creating the
+   * user), and only outside production -- the raw invite token cannot be
+   * recovered afterward since only its hash is stored. A non-production
+   * convenience so an admin can hand a new user their set-password link
+   * without a working mail transport. Always `null` on every other
+   * response (GET/list/update never carry it).
+   */
+  inviteToken: z.string().nullable(),
 });
 export type UserDto = z.infer<typeof userDtoSchema>;
 

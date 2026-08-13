@@ -61,6 +61,7 @@ export const purchaseOrderDtoSchema = z.object({
   rejectionReason: z.string().nullable(),
   cancelledBy: z.string().nullable(),
   cancellationReason: z.string().nullable(),
+  closedBy: z.string().nullable(),
   version: z.number().int(),
   createdAt: z.string(),
   updatedAt: z.string(),
