@@ -1,8 +1,7 @@
 # Inventory Management System
 
 Secure MERN inventory management system. See [`SYSTEM_DOCUMENTATION.md`](./SYSTEM_DOCUMENTATION.md)
-for the full product/engineering contract and [`CLAUDE.md`](./CLAUDE.md) for the coding-agent
-contract governing how this repository is built.
+for the full product/engineering contract.
 
 ## Stack
 
@@ -19,7 +18,6 @@ apps/api/       Express modular monolith
 apps/worker/    Queues and scheduled jobs
 packages/       Shared contracts, config, ui, eslint-config, tsconfig
 infra/          Docker Compose and deployment
-docs/           ADRs and runbooks
 tests/e2e/      Browser end-to-end tests
 ```
 
@@ -39,10 +37,6 @@ pnpm db:migrate
 pnpm seed                       # creates the default organization, permissions, roles, admin user
 pnpm dev                        # runs api + web + worker together
 ```
-
-New to the team? See [`docs/LOCAL_SERVICES.md`](./docs/LOCAL_SERVICES.md) for how to connect to
-the local Mongo/Redis/MinIO containers, and [`docs/MANUAL_TESTING_GUIDE.md`](./docs/MANUAL_TESTING_GUIDE.md)
-for a full click-through walkthrough of every module once the app is running.
 
 ## Quality gates
 

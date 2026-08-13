@@ -12,3 +12,8 @@ Thumbs.db
 .vite/
 *.tsbuildinfo
 /infra/docker/compose/data/
+
+# Kept locally for the coding agent / internal reference, not published
+# to the shared repo.
+/CLAUDE.md
+/docs/
