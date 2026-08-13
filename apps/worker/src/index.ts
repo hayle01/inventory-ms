@@ -1,3 +1,4 @@
+import { createServer } from 'node:http';
 import { Worker, type Job } from 'bullmq';
 import { logger } from './logger.js';
 import { connectMongo, disconnectMongo } from './mongo.js';
@@ -8,6 +9,23 @@ import { verifyMailTransport } from './mail/transport.js';
 import type { NotificationJobData } from './mail/types.js';
 
 /**
+ * The worker is a queue consumer, not a web server -- but some free-tier
+ * hosts (e.g. Render) only offer a free instance type for "Web Service"
+ * deployments, not for a true background-worker service type. This
+ * listener exists solely so those hosts see a live HTTP port and don't
+ * treat the process as failed; it carries no application traffic.
+ */
+function startHealthServer(): void {
+  const port = Number(process.env['PORT'] ?? 4000);
+  createServer((_req, res) => {
+    res.writeHead(200, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ status: 'ok' }));
+  }).listen(port, () => {
+    logger.info({ port }, 'Worker health server listening');
+  });
+}
+
+/**
  * Job processors are registered per module as features land (notifications,
  * exports, alert evaluation, reconciliation). Job payloads must contain IDs
  * only, never full sensitive documents, and processors must be idempotent.
@@ -15,6 +33,7 @@ import type { NotificationJobData } from './mail/types.js';
  * no-op stubs until exports/alerts/reconciliation are built.
  */
 async function main(): Promise<void> {
+  startHealthServer();
   await connectMongo();
   await verifyMailTransport();
   const connection = getBullMqConnection();
